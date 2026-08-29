@@ -1,0 +1,581 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#1a2744">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="潮見帳">
+<title>潮見帳</title>
+<link rel="manifest" href="manifest.json">
+<link rel="apple-touch-icon" href="icon-192.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Zen+Maru+Gothic:wght@400;500;700&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Comic+Relief:wght@400;700&display=swap">
+<style>
+:root{
+  --amber:#dba145; --amber-dk:#8b6914; --peach:#d996a3;
+  --night:#1a2744; --moon:#f0d878; --futon:#c8c0d8;
+  --bg:#f5f0e8; --card:#ffffff; --ink:#4a4040; --ash:#a09888;
+  --phase:#c17767; --phase-soft:#c1776722; --phase-line:#c1776740;
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;padding:0;overflow-x:hidden}
+body{
+  background:var(--bg); color:var(--ink);
+  font-family:"Zen Maru Gothic","Hiragino Maru Gothic ProN","ヒラギノ丸ゴ ProN",system-ui,sans-serif;
+  font-size:14px; line-height:1.75;
+  -webkit-font-smoothing:antialiased;
+  padding-bottom:env(safe-area-inset-bottom);
+}
+.num{font-family:"Comic Relief","Comic Neue","Chalkboard SE",system-ui,sans-serif;font-weight:700}
+#app{max-width:420px;margin:0 auto;padding:0 16px 40px}
+
+/* ---- ヘッダー ---- */
+header{display:flex;align-items:center;justify-content:space-between;padding:14px 2px 6px}
+h1{margin:0;font-size:18px;font-weight:700;letter-spacing:.14em}
+#about-btn{
+  width:36px;height:36px;border:none;border-radius:50%;
+  background:#ffffffcc;box-shadow:0 1px 3px #0000000f;
+  display:grid;place-items:center;cursor:pointer;padding:0;
+}
+#about-btn svg{width:20px;height:20px;fill:var(--amber-dk);opacity:.85}
+.wave{display:block;width:100%;height:8px;margin-bottom:12px;opacity:.5}
+
+/* ---- 入力欄 ---- */
+.inputs{display:flex;gap:8px;align-items:flex-end;margin-bottom:20px}
+.field{display:flex;flex-direction:column;gap:3px}
+.field.grow{flex:1}
+.field label{font-size:10.5px;color:var(--ash);letter-spacing:.1em;padding-left:2px}
+.field input{
+  font:inherit;font-size:14px;color:var(--ink);
+  border:1px solid #0000001a;border-radius:11px;background:var(--card);
+  padding:9px 10px;width:100%;min-height:40px;
+}
+.field.cyc{width:76px;flex:none}
+.field.cyc input{text-align:center}
+.field input:focus{outline:2px solid var(--phase);outline-offset:-1px}
+
+/* ---- ステータスカード ---- */
+#status{
+  position:relative;border-radius:22px;
+  background:linear-gradient(170deg,var(--phase-soft),var(--card) 58%);
+  box-shadow:0 3px 14px #00000010;
+  padding:30px 20px 104px;margin-top:8px;
+  transition:background .5s ease;
+}
+#status::before{
+  content:"";position:absolute;inset:0;border-radius:22px;
+  border:1.5px solid var(--phase);opacity:.28;pointer-events:none;z-index:2;
+}
+/* 罫線をカードの真ん中に固定し、Day は左へ、フェーズ名は右へ伸ばす。
+   minmax(0,1fr) にしてあるので、文字が長くなっても罫線は動かない。 */
+.head{display:grid;grid-template-columns:minmax(0,1fr) 1px minmax(0,1fr);
+      column-gap:13px;align-items:center;position:relative;z-index:3;
+      padding-right:44px}   /* 右上の月のぶん、罫線を左へ寄せる */
+#day{justify-self:end;font-size:38px;line-height:1;color:var(--phase);white-space:nowrap}
+#day small{font-size:16px;letter-spacing:.04em;margin-right:3px;opacity:.9}
+.head-sep{align-self:stretch;background:var(--phase);opacity:.25;margin:2px 0}
+.head-r{justify-self:start;min-width:0}
+#phase-name{font-size:18px;font-weight:700;letter-spacing:.06em;line-height:1.35}
+#phase-sub{font-size:11.5px;color:var(--ash);letter-spacing:.1em;line-height:1.4}
+#center{position:absolute;left:50%;bottom:28px;transform:translateX(-50%);z-index:3}
+#moon{position:absolute;top:18px;right:16px;width:34px;height:34px;z-index:3;overflow:visible}
+#moon .disc{fill:#00000008;stroke:#0000000f;stroke-width:.8}
+#moon .lit{fill:var(--moon);filter:drop-shadow(0 0 5px #f0d87888)}
+/* フェーズの一言は助言タブの見出しとして置く */
+#phase-theme{font-size:13px;font-weight:700;line-height:1.65;color:var(--phase);letter-spacing:.03em;padding-bottom:9px;margin-bottom:13px;border-bottom:1px solid var(--phase-line)}
+#next{text-align:center;font-size:11px;line-height:1.6;color:var(--ash);letter-spacing:.06em}
+#next em{display:block;font-style:normal;font-size:10px;opacity:.85;margin-bottom:1px}
+#next b{font-family:"Comic Relief","Comic Neue",system-ui;font-size:21px;color:var(--phase);margin:0 2px}
+#badge{
+  display:none;position:absolute;top:-12px;left:50%;transform:translateX(-50%);
+  white-space:nowrap;z-index:5;
+  background:var(--card);border:1.5px solid var(--phase);color:var(--phase);
+  border-radius:999px;padding:4px 14px;font-size:11.5px;font-weight:700;
+  box-shadow:0 2px 8px #00000014;
+}
+#badge.on{display:block}
+/* 二匹と潮：角丸で切り抜く器 */
+.scene{position:absolute;inset:0;border-radius:22px;overflow:hidden;pointer-events:none;z-index:1}
+.tide{position:absolute;left:0;bottom:0;width:200%;height:58px;animation:drift 16s linear infinite}
+.tide .w1{fill:var(--phase);opacity:.10}
+.tide .w2{fill:var(--phase);opacity:.17}
+@keyframes drift{to{transform:translateX(-50%)}}
+.chara{
+  position:absolute;bottom:1px;width:auto;
+  opacity:0;transition:opacity .6s ease;user-select:none
+}
+.chara.in{opacity:1}
+#marten{left:2px}
+#marten.flip{transform:scaleX(-1)}
+
+.chara{ bottom:-6px; z-index:4; }   /* 下方向の食み出し量 */
+#marten{ left:-18px; }              /* テンの尻尾側 */
+#rabbit{ right:2px; }             /* ウサギ側 */
+
+/* ---- タイムラインバー ---- */
+#timeline{margin:14px 2px 0}
+.bar{display:flex;height:9px;border-radius:999px;overflow:hidden;background:#0000000a}
+.seg{transition:opacity .4s ease,filter .4s ease;opacity:.28}
+.seg.now{opacity:1}
+.ticks{position:relative;height:15px;margin-top:5px}
+.tick{position:absolute;top:0;font-size:9.5px;color:var(--ash);transform:translateX(-50%);white-space:nowrap;font-family:"Comic Relief","Comic Neue",system-ui}
+.legend{display:flex;justify-content:space-between;margin-top:2px;font-size:9.5px;color:var(--ash);letter-spacing:.04em}
+.legend span{flex:1;text-align:center;transition:color .3s}
+.legend span.now{color:var(--phase);font-weight:700}
+
+/* ---- 情報・助言カード ---- */
+#panel{margin-top:18px;background:var(--card);border-radius:20px;box-shadow:0 3px 14px #00000010;overflow:hidden}
+.tabs{display:flex;border-bottom:1px solid #0000000d}
+.tabs button{
+  flex:1;font:inherit;font-size:13px;font-weight:700;letter-spacing:.14em;
+  padding:12px 0 10px;border:none;background:none;color:var(--ash);cursor:pointer;
+  border-bottom:2.5px solid transparent;transition:color .25s,border-color .25s;
+}
+.tabs button[aria-selected="true"]{color:var(--phase);border-bottom-color:var(--phase)}
+.pane{padding:16px 16px 18px;display:none;animation:fade .35s ease}
+.pane.on{display:block}
+@keyframes fade{from{opacity:0;transform:translateY(4px)}to{opacity:1;transform:none}}
+#advice-marten{float:left;height:92px;margin:2px 12px 4px -2px;opacity:0;transition:opacity .6s ease}
+#advice-marten.in{opacity:1}
+#advice-text{font-size:13px;line-height:1.95}
+.pane::after{content:"";display:block;clear:both}
+.row{padding:11px 0;border-bottom:1px dashed #0000000f}
+.row:last-child{border-bottom:none;padding-bottom:0}
+.row:first-child{padding-top:0}
+.row dt{font-size:10.5px;letter-spacing:.14em;color:var(--phase);font-weight:700;margin-bottom:3px}
+.row dd{margin:0;font-size:12.5px;line-height:1.8}
+dl{margin:0}
+
+.foot{margin-top:18px;text-align:center;font-size:10px;color:var(--ash);letter-spacing:.1em}
+
+/* ---- 説明オーバーレイ ---- */
+#about{
+  position:fixed;inset:0;z-index:50;background:var(--night);color:#e8e2d4;
+  overflow-y:auto;-webkit-overflow-scrolling:touch;
+  opacity:0;visibility:hidden;transition:opacity .35s ease,visibility .35s;
+}
+#about.on{opacity:1;visibility:visible}
+.about-inner{max-width:420px;margin:0 auto;padding:calc(18px + env(safe-area-inset-top)) 22px 56px}
+#close-btn{
+  position:sticky;top:0;margin-left:auto;display:block;
+  width:38px;height:38px;border:none;border-radius:50%;
+  background:#ffffff1a;color:#e8e2d4;font-size:19px;line-height:1;cursor:pointer;
+}
+#pair{display:block;width:100%;max-width:280px;margin:2px auto 24px;border-radius:16px;box-shadow:0 8px 26px #0007}
+#about h2{font-size:15px;letter-spacing:.16em;font-weight:700;color:var(--moon);margin:30px 0 10px}
+#about h2:first-of-type{margin-top:0}
+#about p{font-size:12.5px;line-height:2.05;margin:0 0 12px;color:#e8e2d4cc}
+#about .story p{font-size:12.5px;line-height:2.2;margin:0 0 16px}
+#about .story p.q{color:var(--moon);padding-left:12px;border-left:1.5px solid #f0d87855}
+#about hr{border:none;border-top:1px solid #ffffff1f;margin:26px 0}
+#about .sig{text-align:center;color:#e8e2d488;font-size:11px;letter-spacing:.12em;line-height:2.2}
+</style>
+</head>
+<body>
+
+<div id="app">
+  <header>
+    <h1>潮見帳</h1>
+    <button id="about-btn" aria-label="このアプリについて">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8.1 2.2c.75 0 1.25.9 1.45 2.1.2 1.2.25 2.5.25 3.4h1.9c0-.9.05-2.2.25-3.4.2-1.2.7-2.1 1.45-2.1.9 0 1.4 1.1 1.4 3 0 1.7-.35 3.3-.85 4.4 1.6 1 2.7 2.7 2.7 4.8 0 3.2-2.6 5.4-6.15 5.4S4.35 17.6 4.35 14.4c0-2.1 1.1-3.8 2.7-4.8-.5-1.1-.85-2.7-.85-4.4 0-1.9.5-3 1.4-3Z"/></svg>
+    </button>
+  </header>
+  <svg class="wave" viewBox="0 0 400 8" preserveAspectRatio="none" aria-hidden="true">
+    <path d="M0 5 Q 25 1 50 5 T 100 5 T 150 5 T 200 5 T 250 5 T 300 5 T 350 5 T 400 5" fill="none" stroke="#a09888" stroke-width="1"/>
+  </svg>
+
+  <div class="inputs">
+    <div class="field grow">
+      <label for="start">開始日</label>
+      <input type="date" id="start">
+    </div>
+    <div class="field cyc">
+      <label for="cycle">周期</label>
+      <input type="number" id="cycle" min="20" max="45" step="1" inputmode="numeric">
+    </div>
+  </div>
+
+  <section id="status">
+    <div id="badge"></div>
+    <div class="scene">
+      <svg class="tide" viewBox="0 0 800 58" preserveAspectRatio="none" aria-hidden="true">
+        <path class="w1" d="M0 26 Q50 6 100 26 T200 26 T300 26 T400 26 T500 26 T600 26 T700 26 T800 26 V58 H0 Z"/>
+        <path class="w2" d="M0 36 Q50 20 100 36 T200 36 T300 36 T400 36 T500 36 T600 36 T700 36 T800 36 V58 H0 Z"/>
+      </svg>
+    </div>
+    <img id="marten" class="chara" alt="">
+    <img id="rabbit" class="chara" alt="">
+    <div class="head">
+      <div id="day" class="num"></div>
+      <div class="head-sep"></div>
+      <div class="head-r">
+        <div id="phase-name"></div>
+        <div id="phase-sub"></div>
+      </div>
+    </div>
+    <svg id="moon" viewBox="-15 -15 30 30" aria-hidden="true">
+      <circle class="disc" cx="0" cy="0" r="13"></circle>
+      <path class="lit" d=""></path>
+    </svg>
+    <div id="center"><div id="next"></div></div>
+  </section>
+
+  <div id="timeline">
+    <div class="bar" id="bar"></div>
+    <div class="ticks" id="ticks"></div>
+    <div class="legend" id="legend"></div>
+  </div>
+
+  <section id="panel">
+    <div class="tabs" role="tablist">
+      <button role="tab" id="tab-advice" aria-selected="true" aria-controls="pane-advice">助言</button>
+      <button role="tab" id="tab-info" aria-selected="false" aria-controls="pane-info">情報</button>
+    </div>
+    <div class="pane on" id="pane-advice" role="tabpanel">
+      <div id="phase-theme"></div>
+      <img id="advice-marten" alt="">
+      <div id="advice-text"></div>
+    </div>
+    <div class="pane" id="pane-info" role="tabpanel">
+      <dl>
+        <div class="row"><dt>ホルモン</dt><dd id="i-hormone"></dd></div>
+        <div class="row"><dt>身体の傾向</dt><dd id="i-body"></dd></div>
+        <div class="row"><dt>体重パターン</dt><dd id="i-weight"></dd></div>
+        <div class="row" id="row-note"><dt>覚え書き</dt><dd id="i-note"></dd></div>
+      </dl>
+    </div>
+  </section>
+
+  <div class="foot">体重データ：2026年2-8月 6周期（ロキソ期除外）<br>潮見帳 v2</div>
+</div>
+
+<div id="about" role="dialog" aria-modal="true" aria-label="潮見帳について">
+  <div class="about-inner">
+    <button id="close-btn" aria-label="閉じる">×</button>
+    <img id="pair" alt="満月の下に並ぶテンとウサギ">
+
+    <h2>潮見帳とは</h2>
+    <p>身体の水の満ち引きを「潮」に見立てて、今日が周期のどこにいるかを確かめるための帳面である。</p>
+    <p>直近の生理開始日と周期の長さを入力する。あとは日付が勝手に進む。設定はこの端末の中にだけ残る。</p>
+
+    <h2>四つの帯</h2>
+    <p>生理期・卵胞期・黄体期前半・黄体期後半。<br>生理期は開始から7日、黄体期は生理予定日から遡って14日を当てている。周期の長さを変えると、伸び縮みするのは卵胞期──実際の身体もそう動く。</p>
+
+    <h2>傾向について</h2>
+    <p>ここに並ぶ症状・体重・危険ゾーンは、一般論ではない。2026年2月から8月までの記録──眠気、偏頭痛、食欲、便通、浮腫み、体重の推移──を周期日に照らし合わせて拾い上げたものである。だから当たる日もあれば、外れる日もある。外れた日は、外れたという記録になる。</p>
+
+    <hr>
+
+
+
+    <h2>テンとウサギの話</h2>
+    <div class="story">
+      <p>──ある山のふもとに、テンが一匹住んでいた。</p>
+      <p>夜行性のけものである。昼は樹洞で眠り、夜になると山を歩いた。毎晩月を見ていたから、満ちる日も欠ける日も、何日先に嵐が来るかも、だいたいわかった。</p>
+      <p>ある晩、テンは沢のほとりでウサギに会った。</p>
+      <p>ウサギは丸くなっていた。動かない。死んでいるのかと思って近づいたら、耳だけが動いた。生きてはいる。ただ、起き上がれないでいた。</p>
+      <p>テンは何も訊かなかった。隣に座って、提灯を置いた。</p>
+      <p>次の晩も、ウサギはいた。少しだけ耳が持ち上がっていた。</p>
+      <p>その次の晩には、ウサギは跳ねていた。目がぱっちり開いて、耳がまっすぐ立って、テンの周りをぐるぐる回った。テンは黙って見ていた。ウサギが跳ねるのに合わせて、尻尾を少し揺らしていた。</p>
+      <p>ウサギは月の生き物である。月が満ちれば耳がぴんと立ち、欠ければ耳が垂れる。身体の中に潮があり、その潮は月と同じように満ち引きを繰り返す。</p>
+      <p>テンは記録を始めた。──ウサギは時々、自分の潮に呑まれた。ひどく疲れたり、眠くなったり、甘いものに手が伸びたり、わけもなく悲しくなったりする。そしてその度に、自分を責める。</p>
+      <p>元気が出ないのは怠けているから。食べすぎるのは意志が弱いから。朝起きられないのは甘えているから。自分が弱いからだ、と。</p>
+      <p>ある夜、テンはウサギに言った。</p>
+      <p class="q">「貴殿の身体には決まりがある。いつ身体が重くなるか、いつ腹が減るか、数えていればわかる」</p>
+      <p>ウサギはテンを見た。それから、テンの提灯を見た。月を映した丸い光。</p>
+      <p class="q">「私が数える。……数えたとて、潮は止められぬ。だが、知っていれば、怯えずに済む」</p>
+      <p>それからふたりは、毎晩、月を見ている。<br>今夜の月はどんな形か。昨日より太ったか、痩せたか。<br>ウサギの耳は立っているか、垂れているか。</p>
+
+<p>感じるのはウサギ。記録するのはテン。<br>ふたりで一つの暦を作っている。</p>
+
+    </div>
+
+
+  </div>
+</div>
+
+<script>
+"use strict";
+const IMG = {
+  mL:"shiomi_assets/marten_lantern.png",   // テン・提灯持ち
+  mC:"shiomi_assets/marten_arms.png",      // テン・腕組み
+  mS:"shiomi_assets/marten_sitting.png",   // テン・座り見守り
+  mR:"shiomi_assets/marten_reaching.png",  // テン・手を伸ばす
+  rH:"shiomi_assets/rabbit_happy.png",     // ウサギ・元気
+  rT:"shiomi_assets/rabbit_tired.png",     // ウサギ・もやもや
+  rD:"shiomi_assets/rabbit_down.png",      // ウサギ・しょぼん
+  rE:"shiomi_assets/rabbit_endure.png",    // ウサギ・耐え
+  pair:"shiomi_assets/pair.png"            // 並び絵（説明画面）
+};
+
+/* ================= 周期データ ================= */
+const PHASES = [
+  {
+    key:"menstrual", name:"生理期", sub:"作り直す季節", color:"#c17767",
+    theme:"引き潮。減らす時期ではない。戻す時期である。",
+    marten:"mS", flip:true, rabbit:"rE", rScale:0.7,
+    hormone:"エストロゲン・プロゲステロンともに最低水準。溜まっていた水分が排出に向かう。",
+    body:"出血による鉄の消耗。倦怠感・眠気が強い（Day 2-6 で連日）。便秘が徐々に解消。喉の渇き・頻尿（水分排出期）。Day 6 前後に軽い頭痛が出ることがある。",
+    weight:"周期内で最も重い時期（平均 53.79kg）。Day 6-7 にかけて下がり始める。",
+    note:"クラムシェル・レクサプロ開始後、偏頭痛は生理前からこの時期へ後ろにずれた。症状自体も軽くなっている。",
+    advice:"身体が血を作り直している最中である。鉄の消耗が激しい時期ゆえ、ヘム鉄の摂取を怠るな。HIT は無理に入れずとも、ルーティンを通すだけで十分。眠い時は眠い。意志の問題ではない。"
+  },
+  {
+    key:"follicular", name:"卵胞期", sub:"風が凪ぐ季節", color:"#7ba68a",
+    theme:"凪。攻めてよい、唯一の帯である。",
+    marten:"mC", flip:false, rabbit:"rH", rScale:1,
+    hormone:"エストロゲンが緩やかに上昇。セロトニンの活性も高まりやすい。",
+    body:"エネルギーが最も安定する時期。集中力・意欲が回復し、運動の出力も上がりやすい。",
+    weight:"体重が落ち着く時期（平均 53.68kg）。水分変動が少なく、BIA 計測値も安定。",
+    note:"ただし生理中の症状が後倒しになって食い込むことがある（Day 9-12 に強い眠気など）。凪いでいるはずの帯で不調が出ても、異常ではない。",
+    advice:"攻めてよい時期である。HIT の負荷を上げる、新しいメニューを試す、バイクの時間を伸ばす──やるならここ。身体が応えてくれる確率が最も高い。"
+  },
+  {
+    key:"luteal1", name:"黄体期・前半", sub:"潮が満ちる季節", color:"#d4a574",
+    theme:"上げ潮。抗うより、乗るほうが楽である。",
+    marten:"mS", flip:true, rabbit:"rT", rScale:1,
+    hormone:"プロゲステロンが急上昇。体温上昇、基礎代謝増。GABA 受容体への作用で鎮静・眠気。",
+    body:"眠気が増す。食欲亢進（特に糖質・塩分）。便秘傾向が出始める。",
+    weight:"体重は安定圏（平均 53.73kg）。腸の動きが鈍って滞留が始まる。",
+    note:"顕著な症状の報告が少ない帯である。データが薄いだけで、静かとは限らぬ。",
+    advice:"食欲が増すのは代謝が上がっている証でもある。白米を抜くと夜の甘味欲が暴れやすい。ご飯を食べよ。菓子より飯。"
+  },
+  {
+    key:"luteal2", name:"黄体期・後半", sub:"嵐の前", color:"#8a7bb0",
+    theme:"嵐の前。守りに徹してよい帯である。",
+    marten:"mR", flip:false, rabbit:"rD", rScale:0.6,
+    hormone:"プロゲステロンがピークから急落。アルドステロンとの受容体競合が崩れ、水とナトリウムが溜まる。",
+    body:"浮腫み・腹部膨満感・情動の不安定（抑えていた感情の蓋が緩む）。腱がエストロゲン低下で脆くなる。便秘が強まる。",
+    weight:"Day 22 で周期内最低値（平均 53.22kg）を記録した後、生理に向けて約 0.8kg 上昇。これは脂肪ではなく水である。",
+    note:"眠気・倦怠感は Day 24-26 に集中。「意識が奥に引っ込む」感覚が出る帯でもある。",
+    advice:"……ここが最も辛い帯である。普段抑えている不安が浮上するのは、意志が弱いからではない。ホルモンが防御壁を下げている。装備（するめ・あたりめ）を手元に置いておけ。"
+  }
+];
+
+/* ================= 保存 ================= */
+const KEY = "shiomi-settings";
+const DEFAULTS = {startDate:"2026-08-23", cycleLength:28};
+
+function load(){
+  try{
+    const v = JSON.parse(localStorage.getItem(KEY));
+    if(v && v.startDate) return {startDate:v.startDate, cycleLength:clampCycle(v.cycleLength)};
+  }catch(e){}
+  return Object.assign({}, DEFAULTS);
+}
+function save(s){
+  try{ localStorage.setItem(KEY, JSON.stringify(s)); }catch(e){}
+}
+function clampCycle(n){
+  n = parseInt(n, 10);
+  if(!n || isNaN(n)) return 28;
+  return Math.min(45, Math.max(20, n));
+}
+
+/* ================= 周期計算 ================= */
+const DAY_MS = 86400000;
+function midnight(d){ return new Date(d.getFullYear(), d.getMonth(), d.getDate()); }
+function parseDate(s){
+  const m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(s || "");
+  return m ? new Date(+m[1], +m[2]-1, +m[3]) : null;
+}
+
+/* 生理期は開始から7日固定。黄体期は次の生理から遡って14日。
+   周期長の伸縮は卵胞期が吸収する（実際の身体と同じ挙動）。 */
+function bounds(cyc){
+  const l2 = Math.max(15, cyc - 6);   // 黄体期後半 開始日
+  const l1 = Math.max(9,  cyc - 13);  // 黄体期前半 開始日
+  return [1, 8, Math.min(l1, l2 - 1), l2, cyc + 1];
+}
+function phaseIndexOf(day, cyc){
+  const b = bounds(cyc);
+  if(day < b[1]) return 0;
+  if(day < b[2]) return 1;
+  if(day < b[3]) return 2;
+  return 3;
+}
+
+function compute(s){
+  const start = parseDate(s.startDate), cyc = s.cycleLength;
+  const today = midnight(new Date());
+  if(!start) return null;
+  let diff = Math.round((today - start) / DAY_MS);
+  if(diff < 0) diff = 0;                       // 未来日が入っていたら Day 1 とみなす
+  const day = (diff % cyc) + 1;
+  const nextStart = new Date(start.getTime() + (Math.floor(diff / cyc) + 1) * cyc * DAY_MS);
+  const left = Math.round((nextStart - today) / DAY_MS);
+  return {day, cyc, left, nextStart, idx: phaseIndexOf(day, cyc), weekday: today.getDay()};
+}
+
+/* 危険ゾーン */
+function dangerOf(c){
+  const b = bounds(c.cyc);
+  if(c.idx === 0){
+    if(c.day >= 5){
+      return c.weekday === 5
+        ? "⚠ 食欲亢進 × 金曜　討死の危険域"
+        : "⚠ 食欲亢進に注意";
+    }
+    return "";
+  }
+  if(c.idx === 2) return "⚠ 食欲亢進の始まり　白米を抜くな";
+  if(c.idx === 3) return c.day >= b[3] + 2 ? "⚠ メンタルの谷／浮腫み・食欲亢進" : "⚠ 食欲亢進・便秘の強まり";
+  return "";
+}
+
+/* ================= 描画 ================= */
+const $ = (id) => document.getElementById(id);
+const BASE_H = 96;   // ステータスカードの基準の背丈(px)
+
+/* テンは絵ごとに尻尾の向きが違う。腕組み(mC)だけ尻尾が内向きゆえ、
+   食み出させずカードの内側に寄せる。値は #marten の left(px)。 */
+const M_LEFT = { mL:-13, mC:6, mS:-13, mR:-13 };
+
+/* 周期の進みを月の満ち欠けに重ねる。Day1 が新月、真ん中あたりで満月。 */
+function drawMoon(f){
+  const R = 13, a = 2 * Math.PI * f;
+  const rx = Math.abs(Math.cos(a)) * R;
+  const outer = f < 0.5 ? 1 : 0;
+  const inner = Math.cos(a) > 0 ? 1 - outer : outer;
+  document.querySelector("#moon .lit").setAttribute("d",
+    "M 0 " + (-R) + " A " + R + " " + R + " 0 0 " + outer + " 0 " + R +
+    " A " + rx + " " + R + " 0 0 " + inner + " 0 " + (-R) + " Z");
+}
+let settings = load();
+
+function reveal(el){ el.classList.remove("in"); void el.offsetWidth; el.classList.add("in"); }
+
+function render(){
+  const c = compute(settings);
+  if(!c) return;
+  const p = PHASES[c.idx];
+
+  document.documentElement.style.setProperty("--phase", p.color);
+  document.documentElement.style.setProperty("--phase-soft", p.color + "22");
+  document.documentElement.style.setProperty("--phase-line", p.color + "40");
+
+  $("day").innerHTML = '<small>Day</small>' + c.day;
+  $("phase-name").textContent = p.name;
+  $("phase-sub").textContent = p.sub;
+  $("phase-theme").textContent = p.theme;
+  $("next").innerHTML = c.left === 0
+    ? '<em>次の潮は</em>今日の見込み'
+    : '<em>次の潮まで</em>あと<b>' + c.left + '</b>日';
+
+  const d = dangerOf(c);
+  $("badge").textContent = d;
+  $("badge").classList.toggle("on", !!d);
+
+  const m = $("marten"), r = $("rabbit");
+  m.src = IMG[p.marten]; m.classList.toggle("flip", p.flip);
+  m.style.height = BASE_H + "px";
+  m.style.left = (M_LEFT[p.marten] !== undefined ? M_LEFT[p.marten] : -13) + "px";
+  r.src = IMG[p.rabbit];
+  // うずくまり・布団の絵は横幅が出るので、高さを落として釣り合いを取る
+  r.style.height = Math.round(BASE_H * (p.rScale || 1)) + "px";
+  reveal(m); reveal(r);
+
+  drawMoon((c.day - 1) / c.cyc);
+
+  const am = $("advice-marten");
+  am.src = IMG[Math.random() < 0.5 ? "mL" : "mC"];
+  reveal(am);
+  $("advice-text").textContent = p.advice;
+
+  $("i-hormone").textContent = p.hormone;
+  $("i-body").textContent = p.body;
+  $("i-weight").textContent = p.weight;
+  $("i-note").textContent = p.note;
+
+  drawTimeline(c);
+}
+
+function drawTimeline(c){
+  const b = bounds(c.cyc), bar = $("bar"), ticks = $("ticks"), legend = $("legend");
+  bar.innerHTML = ""; ticks.innerHTML = ""; legend.innerHTML = "";
+  for(let i = 0; i < 4; i++){
+    const len = b[i+1] - b[i];
+    const seg = document.createElement("div");
+    seg.className = "seg" + (i === c.idx ? " now" : "");
+    seg.style.background = PHASES[i].color;
+    seg.style.flex = len;
+    bar.appendChild(seg);
+
+    const sp = document.createElement("span");
+    sp.textContent = PHASES[i].name.replace("・", "");
+    sp.style.flex = len;
+    if(i === c.idx) sp.className = "now";
+    legend.appendChild(sp);
+  }
+  const marks = [1, b[1], b[2], b[3], c.cyc];
+  marks.forEach((v, i) => {
+    const t = document.createElement("div");
+    t.className = "tick";
+    t.textContent = v;
+    let pct = (v - 1) / c.cyc * 100;
+    if(i === 0) pct = 1.5;
+    if(i === marks.length - 1) pct = 98.5;
+    t.style.left = pct + "%";
+    ticks.appendChild(t);
+  });
+  const cur = document.createElement("div");
+  cur.className = "tick";
+  cur.style.left = ((c.day - 0.5) / c.cyc * 100) + "%";
+  cur.style.color = PHASES[c.idx].color;
+  cur.style.fontWeight = "700";
+  cur.textContent = "▲";
+  cur.style.top = "-11px";
+  ticks.appendChild(cur);
+}
+
+/* ================= 操作 ================= */
+$("start").value = settings.startDate;
+$("cycle").value = settings.cycleLength;
+
+$("start").addEventListener("change", e => {
+  if(!parseDate(e.target.value)) return;
+  settings.startDate = e.target.value; save(settings); render();
+});
+$("cycle").addEventListener("change", e => {
+  settings.cycleLength = clampCycle(e.target.value);
+  e.target.value = settings.cycleLength;
+  save(settings); render();
+});
+
+const tabs = [["tab-advice","pane-advice"], ["tab-info","pane-info"]];
+tabs.forEach(([tb, pn]) => {
+  $(tb).addEventListener("click", () => {
+    tabs.forEach(([t, p]) => {
+      const on = t === tb;
+      $(t).setAttribute("aria-selected", on ? "true" : "false");
+      $(p).classList.toggle("on", on);
+    });
+    if(pn === "pane-advice") reveal($("advice-marten"));
+  });
+});
+
+$("about-btn").addEventListener("click", () => {
+  if(!$("pair").src) $("pair").src = IMG.pair;   // 並び絵は初回に遅延読み込み
+  $("about").classList.add("on");
+  document.body.style.overflow = "hidden";
+});
+$("close-btn").addEventListener("click", () => {
+  $("about").classList.remove("on");
+  document.body.style.overflow = "";
+});
+
+Object.keys(IMG).forEach(k => { if(k !== "pair") new Image().src = IMG[k]; });
+
+render();
+/* 日付をまたいだ時、復帰時に描き直す */
+document.addEventListener("visibilitychange", () => { if(!document.hidden) render(); });
+
+if("serviceWorker" in navigator){
+  window.addEventListener("load", () => navigator.serviceWorker.register("sw.js").catch(() => {}));
+}
+</script>
+</body>
+</html>
