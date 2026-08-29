@@ -45,15 +45,22 @@ h1{margin:0;font-size:18px;font-weight:700;letter-spacing:.14em}
 
 /* ---- 入力欄 ---- */
 .inputs{display:flex;gap:8px;align-items:flex-end;margin-bottom:20px}
-.field{display:flex;flex-direction:column;gap:3px}
-.field.grow{flex:1}
+.field{display:flex;flex-direction:column;gap:3px;min-width:0}
+.field.grow{flex:1 1 auto;min-width:0}   /* min-width:auto だと iOS で縮まない */
 .field label{font-size:10.5px;color:var(--ash);letter-spacing:.1em;padding-left:2px}
 .field input{
-  font:inherit;font-size:14px;color:var(--ink);
+  font:inherit;font-size:16px;color:var(--ink);   /* 16px 未満だと iOS が勝手に拡大する */
   border:1px solid #0000001a;border-radius:11px;background:var(--card);
-  padding:9px 10px;width:100%;min-height:40px;
+  padding:9px 10px;width:100%;min-width:0;max-width:100%;min-height:42px;
+  -webkit-appearance:none;appearance:none;   /* iOS 既定の固有幅を捨てる */
 }
-.field.cyc{width:76px;flex:none}
+/* iOS の日付欄は中身が中央寄せで固有幅を持つ。左寄せにして余白を殺す */
+.field input[type="date"]{text-align:left}
+.field input[type="date"]::-webkit-date-and-time-value{text-align:left;margin:0}
+.field input[type="date"]::-webkit-datetime-edit{padding:0}
+.field input[type="number"]::-webkit-inner-spin-button,
+.field input[type="number"]::-webkit-outer-spin-button{-webkit-appearance:none;margin:0}
+.field.cyc{width:78px;flex:0 0 78px}
 .field.cyc input{text-align:center}
 .field input:focus{outline:2px solid var(--phase);outline-offset:-1px}
 
