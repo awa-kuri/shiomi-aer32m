@@ -311,6 +311,8 @@ const IMG = {
   mC:"shiomi_assets/marten_arms.png",      // テン・腕組み
   mS:"shiomi_assets/marten_sitting.png",   // テン・座り見守り
   mR:"shiomi_assets/marten_reaching.png",  // テン・手を伸ばす
+  mW:"shiomi_assets/marten_writing.png",   // テン・記帳
+  mD:"shiomi_assets/marten_reading.png",   // テン・読書
   rH:"shiomi_assets/rabbit_happy.png",     // ウサギ・元気
   rT:"shiomi_assets/rabbit_tired.png",     // ウサギ・もやもや
   rD:"shiomi_assets/rabbit_down.png",      // ウサギ・しょぼん
@@ -343,7 +345,7 @@ const PHASES = [
   {
     key:"luteal1", name:"黄体期・前半", sub:"潮が満ちる季節", color:"#d4a574",
     theme:"上げ潮。抗うより、乗るほうが楽である。",
-    marten:"mS", flip:true, rabbit:"rT", rScale:1,
+    marten:"mW", flip:false, rabbit:"rT", rScale:1,
     hormone:"プロゲステロンが急上昇。体温上昇、基礎代謝増。GABA 受容体への作用で鎮静・眠気。",
     body:"眠気が増す。食欲亢進（特に糖質・塩分）。便秘傾向が出始める。",
     weight:"体重は安定圏（平均 53.73kg）。腸の動きが鈍って滞留が始まる。",
@@ -439,7 +441,7 @@ const BASE_H = 96;   // ステータスカードの基準の背丈(px)
 
 /* テンは絵ごとに尻尾の向きが違う。腕組み(mC)だけ尻尾が内向きゆえ、
    食み出させずカードの内側に寄せる。値は #marten の left(px)。 */
-const M_LEFT = { mL:-13, mC:6, mS:-13, mR:-13 };
+const M_LEFT = { mL:-13, mC:6, mS:-13, mR:-13, mW:-13 };
 
 /* 周期の進みを月の満ち欠けに重ねる。Day1 が新月、真ん中あたりで満月。 */
 function drawMoon(f){
@@ -488,7 +490,7 @@ function render(){
   drawMoon((c.day - 1) / c.cyc);
 
   const am = $("advice-marten");
-  am.src = IMG[Math.random() < 0.5 ? "mL" : "mC"];
+  am.src = IMG[Math.random() < 0.5 ? "mL" : "mD"];
   reveal(am);
   $("advice-text").textContent = p.advice;
 
