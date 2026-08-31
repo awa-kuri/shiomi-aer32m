@@ -215,11 +215,13 @@ dl{margin:0}
 #cal-grid .cell .d{font-size:12px;color:var(--ink);opacity:.9;line-height:1}
 #cal-grid .cell.today .d{font-weight:700;opacity:1}
 #cal-grid .cell i{width:4px;height:4px;border-radius:50%;display:block}
-#cal-legend{display:grid;grid-template-columns:1fr 1fr;gap:4px 8px;margin-top:10px}
-#cal-legend div{display:flex;align-items:center;gap:5px;font-size:10px;color:var(--ash);white-space:nowrap}
+.cal-foot{display:flex;align-items:center;gap:10px;margin-top:10px}
+#cal-legend{flex:1;min-width:0;display:grid;grid-template-columns:1fr;gap:3px}
+#cal-legend div{display:flex;align-items:center;gap:5px;font-size:10.5px;color:var(--ash);white-space:nowrap}
+#cal-legend em{margin-left:3px;font-style:normal;font-size:11px;line-height:1}
 #cal-legend i{width:10px;height:10px;border-radius:3px;flex:none}
 #cal-legend b{color:var(--ink);font-weight:400}
-#cal-art{display:block;width:104px;margin:8px auto 2px;opacity:.95}
+#cal-art{display:block;width:160px;flex:none;margin-left:auto;opacity:.95}
 #cal-close{
   display:block;width:100%;margin-top:4px;padding:9px 0;border:none;border-radius:12px;
   background:#00000008;color:var(--ash);font:inherit;font-size:11.5px;letter-spacing:.14em;cursor:pointer;
@@ -340,8 +342,10 @@ dl{margin:0}
     </div>
     <div class="cal-dow"><span>日</span><span>月</span><span>火</span><span>水</span><span>木</span><span>金</span><span>土</span></div>
     <div id="cal-grid"></div>
-    <div id="cal-legend"></div>
-    <img id="cal-art" alt="">
+    <div class="cal-foot">
+      <div id="cal-legend"></div>
+      <img id="cal-art" alt="">
+    </div>
     <button id="cal-close">閉じる</button>
   </div>
 </div>
@@ -418,7 +422,7 @@ const PHASES = [
     body:"出血による鉄の消耗。倦怠感・眠気が強い（Day 2-6 で連日）。便秘が徐々に解消。喉の渇き・頻尿（水分排出期）。Day 6 前後に軽い頭痛が出ることがある。",
     weight:"周期内で最も重い時期（平均 53.79kg）。Day 6-7 にかけて下がり始める。",
     note:"クラムシェル・レクサプロ開始後、偏頭痛は生理前からこの時期へ後ろにずれた。症状自体も軽くなっている。",
-    hint:"戻す",
+    hint:"▼",
     talkM:["無理をするな","血を作るのに、鉄が要る","眠いなら寝よ。それが今日の仕事である","よく持ちこたえている"],
     talkR:["……あったかい","おなかが、おもい","うごきたくない…","ねむい"],
     advice:"身体が血を作り直している最中である。鉄の消耗が激しい時期ゆえ、ヘム鉄の摂取を怠るな。HIT は無理に入れずとも、ルーティンを通すだけで十分。眠い時は眠い。意志の問題ではない。"
@@ -431,7 +435,7 @@ const PHASES = [
     body:"エネルギーが最も安定する時期。集中力・意欲が回復し、運動の出力も上がりやすい。",
     weight:"体重が落ち着く時期（平均 53.68kg）。水分変動が少なく、BIA 計測値も安定。",
     note:"ただし生理中の症状が後倒しになって食い込むことがある（Day 9-12 に強い眠気など）。凪いでいるはずの帯で不調が出ても、異常ではない。",
-    hint:"攻めてよい",
+    hint:"◎",
     talkM:["今日は行ける","風が凪いでいる","試すなら、この帯である","身体が応える時期だ"],
     talkR:["なんかいける！","あしがかるい","はねたい","きょうはいいひ"],
     advice:"攻めてよい時期である。HIT の負荷を上げる、新しいメニューを試す、バイクの時間を伸ばす──やるならここ。身体が応えるだろう。"
@@ -444,7 +448,7 @@ const PHASES = [
     body:"眠気が増す。食欲亢進（特に糖質・塩分）。便秘傾向が出始める。",
     weight:"体重は安定圏（平均 53.73kg）。腸の動きが鈍って滞留が始まる。",
     note:"顕著な症状の報告が少ない帯である。データが薄いだけで、静かとは限らぬ。",
-    hint:"満ちてくる",
+    hint:"△",
     talkM:["飯を食え。菓子ではない","眠いのは代謝が上がっている証である","今日は守りでよい","腹が減るのは道理である"],
     talkR:["おこめたべたい","ねむい……","おなかすいた","なんかもやもやする"],
     advice:"食欲が増すのは代謝が上がっている証でもある。白米を抜くと夜の甘味欲が暴れやすい。米を食べよ。菓子より飯。"
@@ -457,7 +461,7 @@ const PHASES = [
     body:"浮腫み・腹部膨満感・情動の不安定（抑えていた感情の蓋が緩む）。腱がエストロゲン低下で脆くなる。便秘が強まる。",
     weight:"Day 22 で周期内最低値（平均 53.22kg）を記録した後、生理に向けて約 0.8kg 上昇。これは脂肪ではなく水である。",
     note:"眠気・倦怠感は Day 24-26 に集中。「意識が奥に引っ込む」感覚が出る帯でもある。",
-    hint:"守り",
+    hint:"▲",
     talkM:["……そばにいる","意志の問題ではない。ホルモンである","するめを噛め","この帯を越えれば、潮が変わる"],
     talkR:["なんだかかなしい","……なにもしたくない","ぎゅってして","からだがおもい"],
     advice:"……ここが最も辛い帯である。普段抑えている不安が浮上するのは、意志が弱いからではない。ホルモンが防御壁を下げている。"
@@ -715,7 +719,8 @@ function drawCal(){
   if(!lg.childElementCount){
     PHASES.forEach(ph => {
       const row = document.createElement("div");
-      row.innerHTML = '<i style="background:' + ph.color + '30"></i><b>' + ph.name + '</b>' + ph.hint;
+      row.innerHTML = '<i style="background:' + ph.color + '30"></i><b>' + ph.name + '</b>'
+                    + '<em style="color:' + ph.color + '">' + ph.hint + '</em>';
       lg.appendChild(row);
     });
     const a = document.createElement("div");
