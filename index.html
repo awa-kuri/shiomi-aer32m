@@ -35,6 +35,7 @@ body{
 /* ---- ヘッダー ---- */
 header{display:flex;align-items:center;justify-content:space-between;padding:14px 2px 6px}
 h1{margin:0;font-size:18px;font-weight:700;letter-spacing:.14em}
+#today{margin-left:auto;margin-right:12px;font-size:12px;font-weight:400;color:var(--ash);letter-spacing:.05em}
 #about-btn{
   width:36px;height:36px;border:none;border-radius:50%;
   background:#ffffffcc;box-shadow:0 1px 3px #0000000f;
@@ -87,7 +88,21 @@ h1{margin:0;font-size:18px;font-weight:700;letter-spacing:.14em}
 .head-r{justify-self:start;min-width:0}
 #phase-name{font-size:18px;font-weight:700;letter-spacing:.06em;line-height:1.35}
 #phase-sub{font-size:11.5px;color:var(--ash);letter-spacing:.1em;line-height:1.4}
-#center{position:absolute;left:50%;bottom:28px;transform:translateX(-50%);z-index:3}
+#center{position:absolute;left:50%;bottom:28px;transform:translateX(-50%);z-index:3;
+        transition:opacity .25s ease}
+#center.hush{opacity:0}
+/* 二匹をつつくと一言返る */
+#bubble{
+  position:absolute;bottom:42px;z-index:6;max-width:166px;text-align:left;
+  background:var(--card);border:1.5px solid var(--phase);border-radius:14px;
+  padding:8px 12px;font-size:12px;line-height:1.65;color:var(--ink);
+  box-shadow:0 3px 10px #00000014;
+  opacity:0;visibility:hidden;transform:translateY(5px);
+  transition:opacity .25s ease,transform .25s ease,visibility .25s;
+}
+#bubble.on{opacity:1;visibility:visible;transform:translateY(0)}
+#bubble.from-m{left:82px;right:auto}    /* テンの口元へ寄せる */
+#bubble.from-r{right:82px;left:auto}    /* ウサギの口元へ寄せる */
 #moon{position:absolute;top:18px;right:16px;width:34px;height:34px;z-index:3;overflow:visible}
 #moon .disc{fill:#00000008;stroke:#0000000f;stroke-width:.8}
 #moon .lit{fill:var(--moon);filter:drop-shadow(0 0 5px #f0d87888)}
@@ -118,12 +133,22 @@ h1{margin:0;font-size:18px;font-weight:700;letter-spacing:.14em}
 #marten{left:2px}
 #marten.flip{transform:scaleX(-1)}
 
-.chara{ bottom:-6px; z-index:4; }   /* 下方向の食み出し量 */
+.chara{ bottom:-6px; z-index:4; cursor:pointer }
+/* つついた時に一度だけ跳ねる。transition ではなく keyframes ゆえ、
+   画像が入れ替わって反転が切り替わっても、くるりと回らない */
+@keyframes poke{0%{transform:translateY(0)}40%{transform:translateY(-7px)}100%{transform:translateY(0)}}
+@keyframes pokeFlip{0%{transform:scaleX(-1)}40%{transform:translateY(-7px) scaleX(-1)}100%{transform:scaleX(-1)}}
+.chara.poke{animation:poke .32s ease}
+#marten.flip.poke{animation:pokeFlip .32s ease}
 #marten{ left:-18px; }              /* テンの尻尾側 */
 #rabbit{ right:2px; }             /* ウサギ側 */
 
 /* ---- タイムラインバー ---- */
-#timeline{margin:14px 2px 0}
+#timeline{margin:14px 2px 0;cursor:pointer}
+.open-cal{margin-top:10px;padding-top:9px;border-top:1px solid #0000000d;
+  text-align:center;font-size:10.5px;letter-spacing:.16em;color:var(--ash)}
+.open-cal::after{content:" ▾"}
+#timeline:active .open-cal{color:var(--phase)}
 .bar{display:flex;height:9px;border-radius:999px;overflow:hidden;background:#0000000a}
 .seg{transition:opacity .4s ease,filter .4s ease;opacity:.28}
 .seg.now{opacity:1}
@@ -158,6 +183,48 @@ dl{margin:0}
 
 .foot{margin-top:18px;text-align:center;font-size:10px;color:var(--ash);letter-spacing:.1em}
 
+/* ---- 暦オーバーレイ ---- */
+#cal{
+  position:fixed;inset:0;z-index:60;display:grid;place-items:center;padding:12px;
+  background:#4a404066;-webkit-backdrop-filter:blur(2px);backdrop-filter:blur(2px);
+  opacity:0;visibility:hidden;transition:opacity .3s ease,visibility .3s;
+}
+#cal.on{opacity:1;visibility:visible}
+.cal-box{
+  width:100%;max-width:376px;max-height:94vh;overflow-y:auto;
+  background:var(--bg);border-radius:20px;padding:12px 12px 10px;
+  box-shadow:0 10px 34px #0000002e;
+  transform:translateY(8px);transition:transform .3s ease;
+}
+#cal.on .cal-box{transform:none}
+.cal-head{display:flex;align-items:center;justify-content:center;gap:8px;margin-bottom:8px}
+#cal-title{font-size:14px;letter-spacing:.05em;color:var(--ink);min-width:118px;text-align:center}
+.cal-head button{
+  width:30px;height:30px;flex:none;border:none;border-radius:50%;background:#00000008;
+  color:var(--phase);font-size:17px;line-height:1;cursor:pointer;
+}
+.cal-dow{display:grid;grid-template-columns:repeat(7,1fr);gap:3px;margin-bottom:4px}
+.cal-dow span{text-align:center;font-size:9.5px;color:var(--ash);letter-spacing:.04em;line-height:1.2}
+.cal-dow span:first-child{color:#c17767}
+.cal-dow span:last-child{color:#7b90b0}
+#cal-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:3px}
+#cal-grid .cell{
+  position:relative;aspect-ratio:1/0.76;border-radius:8px;
+  display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;
+}
+#cal-grid .cell .d{font-size:12px;color:var(--ink);opacity:.9;line-height:1}
+#cal-grid .cell.today .d{font-weight:700;opacity:1}
+#cal-grid .cell i{width:4px;height:4px;border-radius:50%;display:block}
+#cal-legend{display:grid;grid-template-columns:1fr 1fr;gap:4px 8px;margin-top:10px}
+#cal-legend div{display:flex;align-items:center;gap:5px;font-size:10px;color:var(--ash);white-space:nowrap}
+#cal-legend i{width:10px;height:10px;border-radius:3px;flex:none}
+#cal-legend b{color:var(--ink);font-weight:400}
+#cal-art{display:block;width:104px;margin:8px auto 2px;opacity:.95}
+#cal-close{
+  display:block;width:100%;margin-top:4px;padding:9px 0;border:none;border-radius:12px;
+  background:#00000008;color:var(--ash);font:inherit;font-size:11.5px;letter-spacing:.14em;cursor:pointer;
+}
+
 /* ---- 説明オーバーレイ ---- */
 #about{
   position:fixed;inset:0;z-index:50;background:var(--night);color:#e8e2d4;
@@ -186,6 +253,7 @@ dl{margin:0}
 <div id="app">
   <header>
     <h1>潮見帳</h1>
+    <div id="today" class="num"></div>
     <button id="about-btn" aria-label="このアプリについて">
       <svg viewBox="0 0 24 24" aria-hidden="true" xmlns="http://www.w3.org/2000/svg">
   <path d="M8.1 2.2c.75 0 1.25 1 1.45 2.4.2 1.4.25 2.8.25 4.1h1.9c0-1.3.05-2.7.25-4.1.2-1.4.7-2.4 1.45-2.4.9 0 1.4 1.1 1.4 3 0 1.5-.35 2.9-.85 3.8 1.6 1.2 2.7 3.1 2.7 5.4 0 3.2-2.6 5.4-6.15 5.4S4.35 17.6 4.35 14.4c0-2.3 1.1-4.2 2.7-5.4-.5-.9-.85-2.3-.85-3.8 0-1.9.5-3 1.4-3Z"/>
@@ -230,12 +298,14 @@ dl{margin:0}
       <path class="lit" d=""></path>
     </svg>
     <div id="center"><div id="next"></div></div>
+    <div id="bubble" aria-live="polite"></div>
   </section>
 
-  <div id="timeline">
+  <div id="timeline" role="button" tabindex="0" aria-label="暦をひらく">
     <div class="bar" id="bar"></div>
     <div class="ticks" id="ticks"></div>
     <div class="legend" id="legend"></div>
+    <div class="open-cal">暦をひらく</div>
   </div>
 
   <section id="panel">
@@ -259,6 +329,21 @@ dl{margin:0}
   </section>
 
   <div class="foot">体重データ：2026年2-8月 6周期（ロキソ期除外）<br>潮見帳 v2</div>
+</div>
+
+<div id="cal" role="dialog" aria-modal="true" aria-label="暦">
+  <div class="cal-box">
+    <div class="cal-head">
+      <button id="cal-prev" aria-label="前の月">‹</button>
+      <div id="cal-title" class="num"></div>
+      <button id="cal-next" aria-label="次の月">›</button>
+    </div>
+    <div class="cal-dow"><span>日</span><span>月</span><span>火</span><span>水</span><span>木</span><span>金</span><span>土</span></div>
+    <div id="cal-grid"></div>
+    <div id="cal-legend"></div>
+    <img id="cal-art" alt="">
+    <button id="cal-close">閉じる</button>
+  </div>
 </div>
 
 <div id="about" role="dialog" aria-modal="true" aria-label="潮見帳について">
@@ -319,7 +404,8 @@ const IMG = {
   rT:"shiomi_assets/rabbit_tired.png",     // ウサギ・もやもや
   rD:"shiomi_assets/rabbit_down.png",      // ウサギ・しょぼん
   rE:"shiomi_assets/rabbit_endure.png",    // ウサギ・耐え
-  pair:"shiomi_assets/pair.png"            // 並び絵（説明画面）
+  pair:"shiomi_assets/pair.png",           // 並び絵（説明画面の頭）
+  pairRead:"shiomi_assets/pair-2.png"      // 二匹で読む（暦の挿絵）
 };
 
 /* ================= 周期データ ================= */
@@ -327,11 +413,14 @@ const PHASES = [
   {
     key:"menstrual", name:"生理期", sub:"作り直す季節", color:"#c17767",
     theme:"引き潮。減らす時期ではない。戻す時期である。",
-    marten:"mS", flip:true, rabbit:"rE", rScale:0.7,
+    marten:"mS", flip:false, rabbit:"rE", rScale:0.7,
     hormone:"エストロゲン・プロゲステロンともに最低水準。溜まっていた水分が排出に向かう。",
     body:"出血による鉄の消耗。倦怠感・眠気が強い（Day 2-6 で連日）。便秘が徐々に解消。喉の渇き・頻尿（水分排出期）。Day 6 前後に軽い頭痛が出ることがある。",
     weight:"周期内で最も重い時期（平均 53.79kg）。Day 6-7 にかけて下がり始める。",
     note:"クラムシェル・レクサプロ開始後、偏頭痛は生理前からこの時期へ後ろにずれた。症状自体も軽くなっている。",
+    hint:"戻す",
+    talkM:["無理をするな","血を作るのに、鉄が要る","眠いなら寝よ。それが今日の仕事である","よく持ちこたえている"],
+    talkR:["……あったかい","おなかが、おもい","うごきたくない…","ねむい"],
     advice:"身体が血を作り直している最中である。鉄の消耗が激しい時期ゆえ、ヘム鉄の摂取を怠るな。HIT は無理に入れずとも、ルーティンを通すだけで十分。眠い時は眠い。意志の問題ではない。"
   },
   {
@@ -342,6 +431,9 @@ const PHASES = [
     body:"エネルギーが最も安定する時期。集中力・意欲が回復し、運動の出力も上がりやすい。",
     weight:"体重が落ち着く時期（平均 53.68kg）。水分変動が少なく、BIA 計測値も安定。",
     note:"ただし生理中の症状が後倒しになって食い込むことがある（Day 9-12 に強い眠気など）。凪いでいるはずの帯で不調が出ても、異常ではない。",
+    hint:"攻めてよい",
+    talkM:["今日は行ける","風が凪いでいる","試すなら、この帯である","身体が応える時期だ"],
+    talkR:["なんかいける！","あしがかるい","はねたい","きょうはいいひ"],
     advice:"攻めてよい時期である。HIT の負荷を上げる、新しいメニューを試す、バイクの時間を伸ばす──やるならここ。身体が応えるだろう。"
   },
   {
@@ -352,6 +444,9 @@ const PHASES = [
     body:"眠気が増す。食欲亢進（特に糖質・塩分）。便秘傾向が出始める。",
     weight:"体重は安定圏（平均 53.73kg）。腸の動きが鈍って滞留が始まる。",
     note:"顕著な症状の報告が少ない帯である。データが薄いだけで、静かとは限らぬ。",
+    hint:"満ちてくる",
+    talkM:["飯を食え。菓子ではない","眠いのは代謝が上がっている証である","今日は守りでよい","腹が減るのは道理である"],
+    talkR:["おこめたべたい","ねむい……","おなかすいた","なんかもやもやする"],
     advice:"食欲が増すのは代謝が上がっている証でもある。白米を抜くと夜の甘味欲が暴れやすい。米を食べよ。菓子より飯。"
   },
   {
@@ -362,6 +457,9 @@ const PHASES = [
     body:"浮腫み・腹部膨満感・情動の不安定（抑えていた感情の蓋が緩む）。腱がエストロゲン低下で脆くなる。便秘が強まる。",
     weight:"Day 22 で周期内最低値（平均 53.22kg）を記録した後、生理に向けて約 0.8kg 上昇。これは脂肪ではなく水である。",
     note:"眠気・倦怠感は Day 24-26 に集中。「意識が奥に引っ込む」感覚が出る帯でもある。",
+    hint:"守り",
+    talkM:["……そばにいる","意志の問題ではない。ホルモンである","するめを噛め","この帯を越えれば、潮が変わる"],
+    talkR:["なんだかかなしい","……なにもしたくない","ぎゅってして","からだがおもい"],
     advice:"……ここが最も辛い帯である。普段抑えている不安が浮上するのは、意志が弱いからではない。ホルモンが防御壁を下げている。"
   }
 ];
@@ -419,6 +517,20 @@ function compute(s){
   const nextStart = new Date(start.getTime() + (Math.floor(diff / cyc) + 1) * cyc * DAY_MS);
   const left = Math.round((nextStart - today) / DAY_MS);
   return {day, cyc, left, nextStart, idx: phaseIndexOf(day, cyc), weekday: today.getDay()};
+}
+
+/* 任意の日が周期の何日目か（過去の月・先の月も引けるよう剰余を正に寄せる） */
+function cycleDayOf(date){
+  const start = parseDate(settings.startDate);
+  if(!start) return 1;
+  const cyc = settings.cycleLength;
+  const diff = Math.round((midnight(date) - start) / DAY_MS);
+  return ((diff % cyc) + cyc) % cyc + 1;
+}
+
+const WD = ["日","月","火","水","木","金","土"];
+function fmtToday(d){
+  return (d.getMonth() + 1) + "月" + d.getDate() + "日 (" + WD[d.getDay()] + ")";
 }
 
 /* 危険ゾーン */
@@ -501,6 +613,10 @@ function render(){
   $("i-weight").textContent = p.weight;
   $("i-note").textContent = p.note;
 
+  $("today").textContent = fmtToday(new Date());
+  $("bubble").className = "";
+  $("center").classList.remove("hush");
+
   drawTimeline(c);
 }
 
@@ -542,6 +658,93 @@ function drawTimeline(c){
   ticks.appendChild(cur);
 }
 
+/* ================= おまけ：二匹が一言返す ================= */
+let bubbleTimer = null;
+function speak(who, el){
+  const c = compute(settings);
+  if(!c) return;
+  const p = PHASES[c.idx];
+  const lines = (who === "m" ? p.talkM : p.talkR) || [];
+  if(!lines.length) return;
+  const b = $("bubble");
+  let t = lines[Math.floor(Math.random() * lines.length)];
+  if(t === b.textContent && lines.length > 1) t = lines[(lines.indexOf(t) + 1) % lines.length];
+  b.textContent = t;
+  b.className = "on from-" + who;
+  $("center").classList.add("hush");
+  el.classList.add("poke");
+  setTimeout(() => el.classList.remove("poke"), 260);
+  clearTimeout(bubbleTimer);
+  bubbleTimer = setTimeout(() => {
+    b.className = "";
+    $("center").classList.remove("hush");
+  }, 4200);
+}
+
+/* ================= 暦 ================= */
+let calMonth = null;   // 表示中の月の一日
+
+function drawCal(){
+  const y = calMonth.getFullYear(), m = calMonth.getMonth();
+  $("cal-title").textContent = y + "年 " + (m + 1) + "月";
+  const first = new Date(y, m, 1), lastDay = new Date(y, m + 1, 0).getDate();
+  const today = midnight(new Date()).getTime();
+  const g = $("cal-grid");
+  g.innerHTML = "";
+  for(let i = 0; i < first.getDay(); i++) g.appendChild(document.createElement("div"));
+  for(let d = 1; d <= lastDay; d++){
+    const date = new Date(y, m, d);
+    const cd = cycleDayOf(date);
+    const ph = PHASES[phaseIndexOf(cd, settings.cycleLength)];
+    const cell = document.createElement("div");
+    cell.className = "cell" + (date.getTime() === today ? " today" : "");
+    cell.style.background = ph.color + "30";
+    if(date.getTime() === today) cell.style.boxShadow = "inset 0 0 0 2px " + ph.color;
+    cell.title = ph.name + "　Day " + cd;
+    const n = document.createElement("span");
+    n.className = "d num"; n.textContent = d;
+    cell.appendChild(n);
+    if(cd === 1){                       // 潮の始まり
+      const dot = document.createElement("i");
+      dot.style.background = ph.color;
+      cell.appendChild(dot);
+    }
+    g.appendChild(cell);
+  }
+  const lg = $("cal-legend");
+  if(!lg.childElementCount){
+    PHASES.forEach(ph => {
+      const row = document.createElement("div");
+      row.innerHTML = '<i style="background:' + ph.color + '30"></i><b>' + ph.name + '</b>' + ph.hint;
+      lg.appendChild(row);
+    });
+    const a = document.createElement("div");
+    a.innerHTML = '<i style="box-shadow:inset 0 0 0 2px var(--ash)"></i>今日';
+    lg.appendChild(a);
+    const b = document.createElement("div");
+    b.innerHTML = '<i style="background:none;box-shadow:none;display:grid;place-items:center">'
+                + '<span style="width:4px;height:4px;border-radius:50%;background:var(--ash);display:block"></span></i>潮の始まり';
+    lg.appendChild(b);
+  }
+}
+
+function openCal(){
+  calMonth = new Date();
+  calMonth.setDate(1);
+  if(!$("cal-art").src) $("cal-art").src = IMG.pairRead;
+  drawCal();
+  $("cal").classList.add("on");
+  document.body.style.overflow = "hidden";
+}
+function closeCal(){
+  $("cal").classList.remove("on");
+  document.body.style.overflow = "";
+}
+function shiftMonth(n){
+  calMonth.setMonth(calMonth.getMonth() + n);
+  drawCal();
+}
+
 /* ================= 操作 ================= */
 $("start").value = settings.startDate;
 $("cycle").value = settings.cycleLength;
@@ -568,6 +771,18 @@ tabs.forEach(([tb, pn]) => {
   });
 });
 
+$("marten").addEventListener("click", e => speak("m", e.currentTarget));
+$("rabbit").addEventListener("click", e => speak("r", e.currentTarget));
+
+$("timeline").addEventListener("click", openCal);
+$("timeline").addEventListener("keydown", e => {
+  if(e.key === "Enter" || e.key === " "){ e.preventDefault(); openCal(); }
+});
+$("cal-prev").addEventListener("click", () => shiftMonth(-1));
+$("cal-next").addEventListener("click", () => shiftMonth(1));
+$("cal-close").addEventListener("click", closeCal);
+$("cal").addEventListener("click", e => { if(e.target.id === "cal") closeCal(); });
+
 $("about-btn").addEventListener("click", () => {
   if(!$("pair").src) $("pair").src = IMG.pair;   // 並び絵は初回に遅延読み込み
   $("about").classList.add("on");
@@ -578,7 +793,7 @@ $("close-btn").addEventListener("click", () => {
   document.body.style.overflow = "";
 });
 
-Object.keys(IMG).forEach(k => { if(k !== "pair") new Image().src = IMG[k]; });
+Object.keys(IMG).forEach(k => { if(k.indexOf("pair") !== 0) new Image().src = IMG[k]; });
 
 render();
 /* 日付をまたいだ時、復帰時に描き直す */
