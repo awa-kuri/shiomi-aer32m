@@ -2,7 +2,7 @@
 <html lang="ja">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
 <meta name="theme-color" content="#1a2744">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="潮見帳">
@@ -94,7 +94,7 @@ h1{margin:0;font-size:18px;font-weight:700;letter-spacing:.14em}
 /* 二匹をつつくと一言返る */
 #bubble{
   position:absolute;bottom:42px;z-index:6;max-width:166px;text-align:left;
-  background:var(--card);border:1.5px solid var(--phase);border-radius:20px;
+  background:var(--card);border:1.5px solid var(--phase);border-radius:22px;
   padding:8px 12px;font-size:12px;line-height:1.65;color:var(--ink);
   box-shadow:0 3px 10px #00000014;
   opacity:0;visibility:hidden;transform:translateY(5px);
@@ -216,8 +216,16 @@ dl{margin:0}
 #cal-grid .cell.today .d{font-weight:700;opacity:1}
 #cal-grid .cell i{width:4px;height:4px;border-radius:50%;display:block}
 .cal-foot{display:flex;align-items:center;gap:10px;margin-top:10px}
-#cal-legend{flex:1;min-width:0;display:grid;grid-template-columns:1fr;gap:3px}
-#cal-legend div{display:flex;align-items:center;gap:5px;font-size:10.5px;color:var(--ash);white-space:nowrap}
+#cal-legend {
+  flex: 1;
+  min-width: 0;
+  display: grid;
+  grid-template-columns: repeat(2, auto); /* 2列構成にする */
+  grid-auto-flow: column;                /* 上から下に並べ、溢れたら右の列へ移動させる */
+  grid-template-rows: repeat(4, auto);   /* 1列あたり4要素で折り返す（PHASESが4つの場合） */
+  gap: 1px 12px;                          /* 行間3px、列間12pxの余白 */
+}
+#cal-legend div{display:flex;align-items:center;gap:5px;font-size:10.5px;color:var(--ink);white-space:nowrap}
 #cal-legend em{margin-left:3px;font-style:normal;font-size:11px;line-height:1}
 #cal-legend i{width:10px;height:10px;border-radius:3px;flex:none}
 #cal-legend b{color:var(--ink);font-weight:400}
@@ -226,6 +234,7 @@ dl{margin:0}
   display:block;width:100%;margin-top:4px;padding:9px 0;border:none;border-radius:12px;
   background:#00000008;color:var(--ash);font:inherit;font-size:11.5px;letter-spacing:.14em;cursor:pointer;
 }
+
 
 /* ---- 説明オーバーレイ ---- */
 #about{
@@ -369,27 +378,63 @@ dl{margin:0}
 
 
 
-    <h2>テンとウサギの話</h2>
+    <h2>ウサギとテンの話</h2>
     <div class="story">
-      <p>──ある山のふもとに、テンが一匹住んでいた。</p>
-      <p>夜行性のけものである。昼は樹洞で眠り、夜になると山を歩いた。毎晩月を見ていたから、満ちる日も欠ける日も、何日先に嵐が来るかも、だいたいわかった。</p>
-      <p>ある晩、テンは沢のほとりでウサギに会った。</p>
-      <p>ウサギは丸くなっていた。動かない。死んでいるのかと思って近づいたら、耳だけが動いた。生きてはいる。ただ、起き上がれないでいた。</p>
-      <p>テンは何も訊かなかった。隣に座って、提灯を置いた。</p>
-      <p>次の晩も、ウサギはいた。少しだけ耳が持ち上がっていた。</p>
-      <p>その次の晩には、ウサギは跳ねていた。目がぱっちり開いて、耳がまっすぐ立って、テンの周りをぐるぐる回った。テンは黙って見ていた。ウサギが跳ねるのに合わせて、尻尾を少し揺らしていた。</p>
-      <p>ウサギは月の生き物である。月が満ちれば耳がぴんと立ち、欠ければ耳が垂れる。身体の中に潮があり、その潮は月と同じように満ち引きを繰り返す。</p>
-      <p>テンは記録を始めた。──ウサギは時々、自分の潮に呑まれた。ひどく疲れたり、眠くなったり、甘いものに手が伸びたり、わけもなく悲しくなったりする。そしてその度に、自分を責める。</p>
-      <p>元気が出ないのは怠けているから。食べすぎるのは意志が弱いから。朝起きられないのは甘えているから。自分が弱いからだ、と。</p>
-      <p>ある夜、テンはウサギに言った。</p>
-      <p class="q">「貴殿の身体には決まりがある。いつ身体が重くなるか、いつ腹が減るか、数えていればわかる」</p>
-      <p>ウサギはテンを見た。それから、テンの提灯を見た。月を映した丸い光。</p>
-      <p class="q">「私が数える。……数えたとて、潮は止められぬ。だが、知っていれば、怯えずに済む」</p>
-      <p>それからふたりは、毎晩、月を見ている。<br>今夜の月はどんな形か。昨日より太ったか、痩せたか。<br>ウサギの耳は立っているか、垂れているか。</p>
+<p>月の下に暮らす一匹のウサギがいた。</p>
 
-<p>感じるのはウサギ。記録するのはテン。<br>ふたりで一つの暦を作っている。</p>
 
-    </div>
+<p>満ちる月の下では耳がぴんと立ち、足取りも軽い。
+欠けていく月の下では耳が垂れ、身体が重くなる。
+新月の夜には、丸くなってじっとしている。</p>
+
+
+<p>ウサギはずっと、それを自分のせいだと思っていた。
+元気が出ないのは怠けているから。食べすぎるのは意志が弱いから。朝起きられないのは甘えているから。</p>
+
+
+<p>──ある晩のこと。</p>
+
+
+<p>ウサギは沢のほとりで丸まっていた。
+月が昇るのを待っていたが、いくら待っても暗いままだった。</p>
+
+
+<p>ウサギが動けないでいると、暗い山の方から小さな灯りが近づいてきた。</p>
+
+
+<p>テンである。</p>
+
+
+<p>黄金色の毛並みに、やけにキリッとした眉。手には提灯を持っている。</p>
+
+
+<p>「──二十六夜だ。月の出にはまだかかるな」
+
+<p>ウサギの耳が少しだけ動いた。
+
+<p>「……わかるの」
+
+<p>「数えていればわかる」
+
+<p>ウサギはテンを見た。それから、テンの提灯を見た。
+月を模した丸い光。テンはそれを、ウサギのそばに置いた。</p>
+
+<p class="q">「貴殿の身体にも決まりがある。耳が垂れるのは、月が欠けているからである。貴殿のせいではない」</p>
+
+<p></p>
+
+<p>──それから、ウサギはテンのところに来るようになった。
+ウサギは時々跳ねて、時々座り込んで、時々丸くなって動かなかった。どの夜も、テンのそばを離れなかった。</p>
+
+<p>テンは、月の読み方をウサギに教える。</p>
+
+
+<p class="q">「月が読めれば、備えられる。いつ身体が重くなるか、いつ腹が減るか。知っていれば、怯えずに済む」</p>
+
+
+<p>月の下には、テンとウサギがいる。一緒に、月を見ている。</p>
+ 
+</div>
 
 
   </div>
@@ -424,7 +469,7 @@ const PHASES = [
     note:"クラムシェル・レクサプロ開始後、偏頭痛は生理前からこの時期へ後ろにずれた。症状自体も軽くなっている。",
     hint:"▽",
     talkM:["無理をするな","血を作るのに、鉄が要る","眠いなら寝よ。それが今日の仕事である","よく持ちこたえている"],
-    talkR:["……あったかい","おなかが、おもい","うごきたくない…","ねむい"],
+    talkR:["ふぅ…","おなかが、おもい","うごきたくない…","ねむい","うーん…","…あったかい"],
     advice:"身体が血を作り直している最中である。鉄の消耗が激しい時期ゆえ、ヘム鉄の摂取を怠るな。HIT は無理に入れずとも、ルーティンを通すだけで十分。眠い時は眠い。意志の問題ではない。"
   },
   {
@@ -435,7 +480,7 @@ const PHASES = [
     body:"エネルギーが最も安定する時期。集中力・意欲が回復し、運動の出力も上がりやすい。",
     weight:"体重が落ち着く時期（平均 53.68kg）。水分変動が少なく、BIA 計測値も安定。",
     note:"ただし生理中の症状が後倒しになって食い込むことがある（Day 9-12 に強い眠気など）。凪いでいるはずの帯で不調が出ても、異常ではない。",
-    hint:"♫",
+    hint:"♪",
     talkM:["今日は行ける","風が凪いでいる","試すなら、この帯である","身体が応える時期だ"],
     talkR:["なんかいける！","あしがかるい","はねたい","きょうはいいひ"],
     advice:"攻めてよい時期である。HIT の負荷を上げる、新しいメニューを試す、バイクの時間を伸ばす──やるならここ。身体が応えるだろう。"
@@ -450,7 +495,7 @@ const PHASES = [
     note:"顕著な症状の報告が少ない帯である。データが薄いだけで、静かとは限らぬ。",
     hint:"△",
     talkM:["飯を食え。菓子ではない","眠いのは代謝が上がっている証である","今日は守りでよい","腹が減るのは道理である"],
-    talkR:["おこめたべたい","ねむい……","おなかすいた","なんかもやもやする"],
+    talkR:["おこめたべたい","ねむいー…","おなかすいた","なんかもやもやする"],
     advice:"食欲が増すのは代謝が上がっている証でもある。白米を抜くと夜の甘味欲が暴れやすい。米を食べよ。菓子より飯。"
   },
   {
@@ -462,8 +507,8 @@ const PHASES = [
     weight:"Day 22 で周期内最低値（平均 53.22kg）を記録した後、生理に向けて約 0.8kg 上昇。これは脂肪ではなく水である。",
     note:"眠気・倦怠感は Day 24-26 に集中。「意識が奥に引っ込む」感覚が出る帯でもある。",
     hint:"×",
-    talkM:["……そばにいる","意志の問題ではない。ホルモンである","するめを噛め","この帯を越えれば、潮が変わる"],
-    talkR:["なんだかかなしい","……なにもしたくない","ぎゅってして","からだがおもい"],
+    talkM:["…そばにいる","意志の問題ではない。ホルモンである","するめを噛め","この帯を越えれば、潮が変わる"],
+    talkR:["なんだかかなしい","なにもしたくない","ぎゅってして","からだがおもい"],
     advice:"……ここが最も辛い帯である。普段抑えている不安が浮上するのは、意志が弱いからではない。ホルモンが防御壁を下げている。"
   }
 ];
