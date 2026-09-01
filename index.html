@@ -679,10 +679,11 @@ function speak(who, el){
   el.classList.add("poke");
   setTimeout(() => el.classList.remove("poke"), 260);
   clearTimeout(bubbleTimer);
-  bubbleTimer = setTimeout(() => {
-    b.className = "";
+    bubbleTimer = setTimeout(() => {
+    b.classList.remove("on"); // クラス全体を消去せず、表示状態のみを解除する
     $("center").classList.remove("hush");
   }, 4200);
+
 }
 
 /* ================= 暦 ================= */
