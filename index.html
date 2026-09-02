@@ -192,7 +192,7 @@ dl{margin:0}
 #sky.on{opacity:1;visibility:visible}
 .sky-box{
   position:relative;
-  width:100%;max-width:330px;max-height:94vh;overflow-y:auto;text-align:center;
+  width:100%;max-width:352px;max-height:94vh;overflow-y:auto;text-align:center;
   background:var(--bg);border-radius:20px;padding:14px 14px 10px;
   box-shadow:0 10px 34px #0000002e;
   transform:translateY(8px);transition:transform .3s ease;
@@ -217,7 +217,10 @@ dl{margin:0}
 #sky-sub{margin-top:6px;font-size:11.5px;letter-spacing:.08em;color:var(--ash)}
 #sky-sub b{font-family:"Comic Relief","Comic Neue",system-ui;font-size:14px;margin:0 2px;color:var(--ink)}
 #sky-sub em{font-style:normal;color:var(--amber-dk);font-weight:700;margin-left:2px}
-#sky-next{max-width:230px;margin:8px auto 0;font-size:10.5px;line-height:1.75;letter-spacing:.04em;color:var(--ash)}
+#sky-next{max-width:262px;margin:8px auto 0;font-size:10.5px;line-height:1.75;letter-spacing:.04em;color:var(--ash)}
+#sky-sekki{max-width:262px;margin:7px auto 0;padding-top:7px;border-top:1px solid #0000000f;
+  font-size:10.5px;line-height:1.75;letter-spacing:.04em;color:var(--ash)}
+#sky-sekki b{font-weight:700;color:var(--amber-dk)}
 #sky-next b{font-family:"Comic Relief","Comic Neue",system-ui;font-size:13px;color:var(--ink);margin:0 2px}
 #sky-close{
   display:block;width:100%;margin-top:14px;padding:9px 0;border:none;border-radius:12px;
@@ -404,6 +407,7 @@ dl{margin:0}
     <div id="sky-name"></div>
     <div id="sky-sub"></div>
     <div id="sky-next"></div>
+    <div id="sky-sekki"></div>
     <button id="sky-close">閉じる</button>
   </div>
 </div>
@@ -866,6 +870,38 @@ function lunarDate(now){
   };
 }
 
+/* 二十四節気。太陽黄経を15度ずつ刻んだもの。立春が315度、春分が0度 */
+const SEKKI = [
+  ["立春","暦の上の春の始まり。寒さの底を過ぎる"],
+  ["雨水","雪が雨に変わり、氷が解け始める頃"],
+  ["啓蟄","土の中の虫が動き出す頃"],
+  ["春分","昼と夜の長さがほぼ等しくなる"],
+  ["清明","万物が清らかに、明るく茂り始める"],
+  ["穀雨","穀物を潤す春の雨が降る頃"],
+  ["立夏","暦の上の夏の始まり。新緑が濃くなる"],
+  ["小満","草木が茂り、命が満ち始める頃"],
+  ["芒種","芒のある穀物を蒔く頃。梅雨が近い"],
+  ["夏至","一年で最も昼が長い日"],
+  ["小暑","梅雨が明け、暑さが本格になる頃"],
+  ["大暑","一年で最も暑さの厳しい頃"],
+  ["立秋","暦の上の秋の始まり。残暑の盛り"],
+  ["処暑","暑さが収まり始める頃"],
+  ["白露","草に露が結び始める。朝夕が涼しくなる"],
+  ["秋分","昼と夜の長さがほぼ等しくなる"],
+  ["寒露","露が冷たく感じられる頃"],
+  ["霜降","霜が降り始め、冬の気配が立つ"],
+  ["立冬","暦の上の冬の始まり"],
+  ["小雪","わずかに雪が降り始める頃"],
+  ["大雪","雪が本降りになり、積もり始める頃"],
+  ["冬至","一年で最も夜が長い日"],
+  ["小寒","寒の入り。ここから寒さが厳しくなる"],
+  ["大寒","一年で最も寒さの厳しい頃"]
+];
+function sekkiOf(jd){
+  const lon = solarLon(jd);
+  return SEKKI[Math.floor((((lon - 315) % 360 + 360) % 360) / 15)];
+}
+
 const KANSUJI = ["","一","二","三","四","五","六","七","八","九","十",
   "十一","十二","十三","十四","十五","十六","十七","十八","十九","二十",
   "二十一","二十二","二十三","二十四","二十五","二十六","二十七","二十八","二十九","三十"];
@@ -909,7 +945,9 @@ function drawSky(){
   $("sky-lunar").textContent = fmtLunar(lunar);
   $("sky-name").textContent = MOON_NAMES[night];
   $("sky-sub").innerHTML = "月齢 " + age.toFixed(1);
-  $("sky-next").textContent = "【 " + tide + " 】" + TIDE_NOTE[tide] || "";
+  $("sky-next").textContent = "【 " + tide + " 】" + (TIDE_NOTE[tide] || "");
+  const sk = sekkiOf(toJD(now.getTime()));
+  $("sky-sekki").innerHTML = "【 <b>" + sk[0] + "</b> 】" + sk[1];
 }
 
 function openSky(){
