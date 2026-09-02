@@ -103,7 +103,7 @@ h1{margin:0;font-size:18px;font-weight:700;letter-spacing:.14em}
 #bubble.on{opacity:1;visibility:visible;transform:translateY(0)}
 #bubble.from-m{left:82px;right:auto}    /* テンの口元へ寄せる */
 #bubble.from-r{right:82px;left:auto}    /* ウサギの口元へ寄せる */
-#moon{position:absolute;top:18px;right:16px;width:34px;height:34px;z-index:3;overflow:visible}
+#moon{cursor:pointer;position:absolute;top:18px;right:16px;width:34px;height:34px;z-index:3;overflow:visible}
 #moon .disc{fill:#00000008;stroke:#0000000f;stroke-width:.8}
 #moon .lit{fill:var(--moon);filter:drop-shadow(0 0 5px #f0d87888)}
 /* フェーズの一言は助言タブの見出しとして置く */
@@ -183,6 +183,46 @@ dl{margin:0}
 
 .foot{margin-top:18px;text-align:center;font-size:10px;color:var(--ash);letter-spacing:.1em}
 
+/* ---- 今夜の月（暦と同じ小窓。構図はアイコンに合わせる） ---- */
+#sky{
+  position:fixed;inset:0;z-index:70;display:grid;place-items:center;padding:12px;
+  background:#4a404066;-webkit-backdrop-filter:blur(2px);backdrop-filter:blur(2px);
+  opacity:0;visibility:hidden;transition:opacity .3s ease,visibility .3s;
+}
+#sky.on{opacity:1;visibility:visible}
+.sky-box{
+  position:relative;
+  width:100%;max-width:330px;max-height:94vh;overflow-y:auto;text-align:center;
+  background:var(--bg);border-radius:20px;padding:14px 14px 10px;
+  box-shadow:0 10px 34px #0000002e;
+  transform:translateY(8px);transition:transform .3s ease;
+}
+/* 窓の上辺から夜空を差す */
+.sky-box::before{
+  content:"";position:absolute;left:0;right:0;top:0;height:210px;z-index:0;pointer-events:none;
+  background:linear-gradient(180deg,
+    #1a2744 0%, #1a2744f2 42%, #1a2744a8 65%, #f5f0e8 100%);
+}
+.sky-box > *{position:relative;z-index:1}
+#sky.on .sky-box{transform:none}
+.sky-stage{position:relative;height:212px}
+.sky-stage .stars{position:absolute;inset:0;width:100%;height:100%;fill:var(--moon);opacity:.7}
+#bigmoon{position:absolute;top:12px;left:50%;transform:translateX(-50%);width:62px;height:62px;overflow:visible}
+#bigmoon .disc{fill:#1a2744;stroke:#1a2744;stroke-width:0}
+#bigmoon .lit{fill:var(--moon);filter:drop-shadow(0 0 12px #f0d87877)}
+#sky-pair{position:absolute;left:50%;bottom:0;transform:translateX(-50%);width:172px}
+.sky-lead{margin-top:12px;font-size:12px;font-weight:700;letter-spacing:.1em;color:var(--ash)}
+#sky-name{margin-top:3px;font-size:20px;font-weight:700;letter-spacing:.14em;color:var(--amber-dk)}
+#sky-sub{margin-top:6px;font-size:11.5px;letter-spacing:.08em;color:var(--ash)}
+#sky-sub b{font-family:"Comic Relief","Comic Neue",system-ui;font-size:14px;margin:0 2px;color:var(--ink)}
+#sky-sub em{font-style:normal;color:var(--amber-dk);font-weight:700;margin-left:2px}
+#sky-next{max-width:230px;margin:8px auto 0;font-size:10.5px;line-height:1.75;letter-spacing:.04em;color:var(--ash)}
+#sky-next b{font-family:"Comic Relief","Comic Neue",system-ui;font-size:13px;color:var(--ink);margin:0 2px}
+#sky-close{
+  display:block;width:100%;margin-top:14px;padding:9px 0;border:none;border-radius:12px;
+  background:#00000008;color:var(--ash);font:inherit;font-size:11.5px;letter-spacing:.14em;cursor:pointer;
+}
+
 /* ---- 暦オーバーレイ ---- */
 #cal{
   position:fixed;inset:0;z-index:60;display:grid;place-items:center;padding:12px;
@@ -229,7 +269,7 @@ dl{margin:0}
 #cal-legend em{margin-left:3px;font-style:normal;font-size:11px;line-height:1}
 #cal-legend i{width:10px;height:10px;border-radius:3px;flex:none}
 #cal-legend b{color:var(--ink);font-weight:400}
-#cal-art{display:block;width:160px;flex:none;margin-left:auto;opacity:.95}
+#cal-art{display:block;height:118px;width:auto;max-width:186px;flex:none;margin-left:auto;opacity:.95}
 #cal-close{
   display:block;width:100%;margin-top:4px;padding:9px 0;border:none;border-radius:12px;
   background:#00000008;color:var(--ash);font:inherit;font-size:11.5px;letter-spacing:.14em;cursor:pointer;
@@ -253,7 +293,7 @@ dl{margin:0}
 #about h2{font-size:15px;letter-spacing:.16em;font-weight:700;color:var(--moon);margin:30px 0 10px}
 #about h2:first-of-type{margin-top:0}
 #about p{font-size:12.5px;line-height:2.05;margin:0 0 12px;color:#e8e2d4cc}
-#about .story p{font-size:12.5px;line-height:2.2;margin:0 0 16px}
+#about .story p{font-size:12.5px;line-height:1.85;margin:0 0 18px}
 #about .story p.q{color:var(--moon);padding-left:12px;border-left:1.5px solid #f0d87855}
 #about hr{border:none;border-top:1px solid #ffffff1f;margin:26px 0}
 #about .sig{text-align:center;color:#e8e2d488;font-size:11px;letter-spacing:.12em;line-height:2.2}
@@ -342,6 +382,30 @@ dl{margin:0}
   <div class="foot">体重データ：2026年2-8月 6周期（ロキソ期除外）<br>潮見帳 v2</div>
 </div>
 
+<div id="sky" role="dialog" aria-modal="true" aria-label="今夜の月">
+  <div class="sky-box">
+    <div class="sky-stage">
+      <svg class="stars" viewBox="0 0 300 212" aria-hidden="true">
+        <path d="M56 65.5 Q56.975 71.025 62.5 72 Q56.975 72.975 56 78.5 Q55.025 72.975 49.5 72 Q55.025 71.025 56 65.5Z"/>
+        <path d="M30 98 Q30.6 101.4 34 102 Q30.6 102.6 30 106 Q29.4 102.6 26 102 Q29.4 101.4 30 98Z"/>
+        <path d="M246 62.5 Q246.825 67.175 251.5 68 Q246.825 68.825 246 73.5 Q245.175 68.825 240.5 68 Q245.175 67.175 246 62.5Z"/>
+        <path d="M222 98 Q222.6 101.4 226 102 Q222.6 102.6 222 106 Q221.4 102.6 218 102 Q221.4 101.4 222 98Z"/>
+        <path d="M272 102 Q272.6 105.4 276 106 Q272.6 106.6 272 110 Q271.4 106.6 268 106 Q271.4 105.4 272 102Z"/>
+      </svg>
+      <svg id="bigmoon" viewBox="-60 -60 120 120" aria-hidden="true">
+        <circle class="disc" cx="0" cy="0" r="52"></circle>
+        <path class="lit" d=""></path>
+      </svg>
+      <img id="sky-pair" alt="月を見上げるテンとウサギ">
+    </div>
+    <div class="sky-lead" id="sky-date"></div>
+    <div id="sky-name"></div>
+    <div id="sky-sub"></div>
+    <div id="sky-next"></div>
+    <button id="sky-close">閉じる</button>
+  </div>
+</div>
+
 <div id="cal" role="dialog" aria-modal="true" aria-label="暦">
   <div class="cal-box">
     <div class="cal-head">
@@ -381,59 +445,50 @@ dl{margin:0}
     <h2>ウサギとテンの話</h2>
     <div class="story">
 <p>月の下に暮らす一匹のウサギがいた。</p>
+<p>満ちる月の下では耳がぴんと立ち、足取りも軽い。欠けていく月の下では耳が垂れ、身体が重くなる。新月の夜には、丸くなってじっとしている。</p>
 
+<p>ウサギはずっと、それを自分のせいだと思っていた。<br>
+元気が出ないのは怠けているから。食べすぎるのは意志が弱いから。朝起きられないのは甘えているから。──自分が弱いからだ、と。</p>
 
-<p>満ちる月の下では耳がぴんと立ち、足取りも軽い。
-欠けていく月の下では耳が垂れ、身体が重くなる。
-新月の夜には、丸くなってじっとしている。</p>
+<p>ある晩のこと。</p>
+<p>ウサギは沢のほとりで丸まっていた。<br>
+月が昇るのを待っていたが、いくら待っても暗いまま。</p>
 
+<p>（ からだが、おもい ）</p>
 
-<p>ウサギはずっと、それを自分のせいだと思っていた。
-元気が出ないのは怠けているから。食べすぎるのは意志が弱いから。朝起きられないのは甘えているから。</p>
-
-
-<p>──ある晩のこと。</p>
-
-
-<p>ウサギは沢のほとりで丸まっていた。
-月が昇るのを待っていたが、いくら待っても暗いままだった。</p>
-
-
-<p>ウサギが動けないでいると、暗い山の方から小さな灯りが近づいてきた。</p>
-
+<p>ウサギが動けないでいると、暗い山のほうから小さな灯りが近づいてきた。</p>
 
 <p>テンである。</p>
+<p>黄金色の毛並みに、やけにキリッとした眉。<br>
+手には提灯を持っている。</p>
+
+<p>「 ──二十六夜だ。月の出にはまだかかるな 」</p>
 
 
-<p>黄金色の毛並みに、やけにキリッとした眉。手には提灯を持っている。</p>
+<p>テンが静かに言った。ウサギの耳が、少しだけ動いた。</p>
 
+<p>「 ……わかるの 」<br>
+「 数えていればわかる 」</p>
 
-<p>「──二十六夜だ。月の出にはまだかかるな」
+<p>ウサギはテンを見た。それから、テンの提灯を見た。<br>
+月を模した、丸い光。</p>
 
-<p>ウサギの耳が少しだけ動いた。
+<p>テンはそれを、ウサギのそばに置いた。</p>
 
-<p>「……わかるの」
+<p class="q">「 貴殿の身体にも決まりがある。耳が垂れるのは、月が欠けているからである。貴殿のせいではない 」</p>
 
-<p>「数えていればわかる」
+<p>──それから、ウサギはテンのところに来るようになった。</p>
 
-<p>ウサギはテンを見た。それから、テンの提灯を見た。
-月を模した丸い光。テンはそれを、ウサギのそばに置いた。</p>
+<p>「 きょうは、はんぶんのつき 」<br>
+「 もうすぐまるいつき 」</p>
 
-<p class="q">「貴殿の身体にも決まりがある。耳が垂れるのは、月が欠けているからである。貴殿のせいではない」</p>
-
-<p></p>
-
-<p>──それから、ウサギはテンのところに来るようになった。
-ウサギは時々跳ねて、時々座り込んで、時々丸くなって動かなかった。どの夜も、テンのそばを離れなかった。</p>
+<p>ウサギは時々跳ねて、時々座り込んで、時々丸くなって動かなかった。どの夜も、テンのそばを離れなかった。</p>
 
 <p>テンは、月の読み方をウサギに教える。</p>
 
+<p class="q">「 月が読めれば、備えられる。いつ身体が重くなるか、いつ腹が減るか。知っていれば、怯えずに済む 」</p>
 
-<p class="q">「月が読めれば、備えられる。いつ身体が重くなるか、いつ腹が減るか。知っていれば、怯えずに済む」</p>
-
-
-<p>月の下には、ウサギとテンがいる。一緒に、月を見ている。</p>
- 
+<p>月の下には、ウサギとテンがいる。<p>一緒に、月を見ている。</p>
 </div>
 
 
@@ -454,7 +509,8 @@ const IMG = {
   rD:"shiomi_assets/rabbit_down.png",      // ウサギ・しょぼん
   rE:"shiomi_assets/rabbit_endure.png",    // ウサギ・耐え
   pair:"shiomi_assets/pair.png",           // 並び絵（説明画面の頭）
-  pairRead:"shiomi_assets/pair-2.png"      // 二匹で読む（暦の挿絵）
+  pairRead:"shiomi_assets/pair-2.png",     // 二匹で読む
+  pairSky:"shiomi_assets/pair-6.png"       // 後ろ姿・月を見上げる（今夜の月）
 };
 
 /* ================= 周期データ ================= */
@@ -607,14 +663,16 @@ const BASE_H = 96;   // ステータスカードの基準の背丈(px)
 const M_LEFT = { mL:-13, mC:6, mS:-13, mR:-13, mW:-13 };
 
 /* 周期の進みを月の満ち欠けに重ねる。Day1 が新月、真ん中あたりで満月。 */
-function drawMoon(f){
-  const R = 13, a = 2 * Math.PI * f;
+function moonPath(f, R){
+  const a = 2 * Math.PI * f;
   const rx = Math.abs(Math.cos(a)) * R;
   const outer = f < 0.5 ? 1 : 0;
   const inner = Math.cos(a) > 0 ? 1 - outer : outer;
-  document.querySelector("#moon .lit").setAttribute("d",
-    "M 0 " + (-R) + " A " + R + " " + R + " 0 0 " + outer + " 0 " + R +
-    " A " + rx + " " + R + " 0 0 " + inner + " 0 " + (-R) + " Z");
+  return "M 0 " + (-R) + " A " + R + " " + R + " 0 0 " + outer + " 0 " + R +
+         " A " + rx + " " + R + " 0 0 " + inner + " 0 " + (-R) + " Z";
+}
+function drawMoon(f){
+  document.querySelector("#moon .lit").setAttribute("d", moonPath(f, 13));
 }
 let settings = load();
 
@@ -731,6 +789,63 @@ function speak(who, el){
 
 }
 
+/* ================= 今夜の月 ================= */
+/* 基準：2000年1月6日 18:14 UTC の新月。朔望月は 29.530588853 日 */
+const SYNODIC = 29.530588853;
+const NEW_MOON_0 = Date.UTC(2000, 0, 6, 18, 14) ;
+
+function moonAge(d){
+  const days = (d - NEW_MOON_0) / DAY_MS;
+  return ((days % SYNODIC) + SYNODIC) % SYNODIC;
+}
+
+/* 夜の呼び名。旧暦の日 ＝ 月齢の切り上げ（新月の夜が一日目） */
+const MOON_NAMES = ["", "新月", "二日月", "三日月", "四日の月", "五日の月",
+  "六日の月", "七日の月", "上弦の月", "九日の月", "十日夜の月", "十一日の月",
+  "十二日の月", "十三夜の月", "小望月", "十五夜", "十六夜", "立待月", "居待月",
+  "寝待月", "更待月", "二十一日の月", "二十二日の月", "下弦の月", "二十四日の月",
+  "二十五日の月", "二十六夜", "二十七日の月", "二十八日の月", "二十九日の月", "晦の月"];
+
+/* 潮回り。旧暦の日から引く昔ながらの割り当て */
+/* 潮回りの短い注。月齢との繋がりが分かるように書く */
+const TIDE_NOTE = {
+  "大潮":"新月と満月の前後。満ち引きが最も大きい",
+  "中潮":"大潮と小潮のあいだ。潮は中ほど",
+  "小潮":"上弦・下弦の頃。満ち引きが小さい",
+  "長潮":"小潮の終わり。満ち引きが最も鈍る",
+  "若潮":"長潮の翌日。潮が再び大きくなり始める"
+};
+
+const TIDES = ["", "大潮","大潮","大潮", "中潮","中潮","中潮", "小潮","小潮","小潮",
+  "長潮", "若潮", "中潮","中潮", "大潮","大潮","大潮","大潮",
+  "中潮","中潮","中潮", "小潮","小潮","小潮", "長潮", "若潮",
+  "中潮","中潮", "大潮","大潮","大潮"];
+
+function drawSky(){
+  const now = new Date();
+  const age = moonAge(now.getTime());
+  const night = Math.min(30, Math.floor(age) + 1);   // 新月の夜が一日目
+
+  document.querySelector("#bigmoon .lit").setAttribute("d", moonPath(age / SYNODIC, 52));
+  if(!$("sky-pair").src) $("sky-pair").src = IMG.pairSky;
+
+  const tide = TIDES[night];
+  $("sky-date").textContent = fmtToday(now);
+  $("sky-name").textContent = MOON_NAMES[night];
+  $("sky-sub").innerHTML = "月齢 " + age.toFixed(1);
+  $("sky-next").textContent = "【 " + tide + " 】" + TIDE_NOTE[tide] || "";
+}
+
+function openSky(){
+  drawSky();
+  $("sky").classList.add("on");
+  document.body.style.overflow = "hidden";
+}
+function closeSky(){
+  $("sky").classList.remove("on");
+  document.body.style.overflow = "";
+}
+
 /* ================= 暦 ================= */
 let calMonth = null;   // 表示中の月の一日
 
@@ -824,6 +939,10 @@ tabs.forEach(([tb, pn]) => {
 
 $("marten").addEventListener("click", e => speak("m", e.currentTarget));
 $("rabbit").addEventListener("click", e => speak("r", e.currentTarget));
+
+$("moon").addEventListener("click", openSky);
+$("sky-close").addEventListener("click", closeSky);
+$("sky").addEventListener("click", e => { if(e.target.id === "sky") closeSky(); });
 
 $("timeline").addEventListener("click", openCal);
 $("timeline").addEventListener("keydown", e => {
