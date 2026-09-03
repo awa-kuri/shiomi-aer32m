@@ -181,7 +181,34 @@ h1{margin:0;font-size:18px;font-weight:700;letter-spacing:.14em}
 .row dd{margin:0;font-size:12.5px;line-height:1.8}
 dl{margin:0}
 
-.foot{margin-top:18px;text-align:center;font-size:10px;color:var(--ash);letter-spacing:.1em}
+.foot{cursor:pointer;margin-top:18px;text-align:center;font-size:10px;color:var(--ash);letter-spacing:.1em}
+
+/* ---- この帳面について ---- */
+#info{
+  position:fixed;inset:0;z-index:65;display:grid;place-items:center;padding:12px;
+  background:#4a404066;-webkit-backdrop-filter:blur(2px);backdrop-filter:blur(2px);
+  opacity:0;visibility:hidden;transition:opacity .3s ease,visibility .3s;
+}
+#info.on{opacity:1;visibility:visible}
+.info-box{
+  width:100%;max-width:352px;max-height:92vh;overflow-y:auto;
+  background:var(--bg);border-radius:20px;padding:16px 18px 12px;
+  box-shadow:0 10px 34px #0000002e;
+  transform:translateY(8px);transition:transform .3s ease;
+}
+#info.on .info-box{transform:none}
+#info-art{display:block;height:104px;width:auto;margin:2px auto 18px}
+#info h3{
+  margin:22px 0 7px;font-size:11.5px;font-weight:700;letter-spacing:.18em;color:var(--amber-dk);
+}
+#info h3:first-of-type{margin-top:0}
+#info p{margin:0 0 9px;font-size:11.5px;line-height:2;color:var(--ink);opacity:.86}
+#info hr{border:none;border-top:1px solid #0000000f;margin:22px 0}
+#info .info-note{text-align:center;font-size:10.5px;letter-spacing:.1em;color:var(--ash);opacity:1;margin:0}
+#info-close{
+  display:block;width:100%;margin-top:18px;padding:9px 0;border:none;border-radius:12px;
+  background:#00000008;color:var(--ash);font:inherit;font-size:11.5px;letter-spacing:.14em;cursor:pointer;
+}
 
 /* ---- 今夜の月（暦と同じ小窓。構図はアイコンに合わせる） ---- */
 #sky{
@@ -201,7 +228,7 @@ dl{margin:0}
 .sky-box::before{
   content:"";position:absolute;left:0;right:0;top:0;height:210px;z-index:0;pointer-events:none;
   background:linear-gradient(180deg,
-    #1a2744 0%, #1a2744f2 42%, #1a2744a8 65%, #f5f0e8 100%);
+    #1a2744 0%, #1a2744f2 68%, #1a2744a8 85%, #f5f0e8 95%);
 }
 .sky-box > *{position:relative;z-index:1}
 #sky.on .sky-box{transform:none}
@@ -210,18 +237,36 @@ dl{margin:0}
 #bigmoon{position:absolute;top:12px;left:50%;transform:translateX(-50%);width:62px;height:62px;overflow:visible}
 #bigmoon .disc{fill:#1a2744;stroke:#1a2744;stroke-width:0}
 #bigmoon .lit{fill:var(--moon);filter:drop-shadow(0 0 12px #f0d87877)}
-#sky-pair{position:absolute;left:50%;bottom:0;transform:translateX(-50%);width:172px}
-.sky-lead{margin-top:12px;font-size:12px;font-weight:700;letter-spacing:.1em;color:var(--ash)}
-.sky-lunar{margin-top:3px;font-size:10.5px;letter-spacing:.12em;color:var(--amber-dk);opacity:.7}
-#sky-name{margin-top:3px;font-size:20px;font-weight:700;letter-spacing:.14em;color:var(--amber-dk)}
+#sky-pair{position:absolute;left:50%;bottom:0;transform:translateX(-50%);
+  height:107px;width:auto;cursor:pointer;transition:transform .2s ease}
+#sky-pair.hop{animation:skyHop .5s ease}
+@keyframes skyHop{
+  0%{transform:translateX(-50%) translateY(0)}
+  30%{transform:translateX(-50%) translateY(-9px)}
+  55%{transform:translateX(-50%) translateY(0)}
+  75%{transform:translateX(-50%) translateY(-4px)}
+  100%{transform:translateX(-50%) translateY(0)}
+}
+.sky-lead{font-size:11.5px;letter-spacing:.08em;color:var(--ash)}
+.sky-lunar{font-size:10.5px;letter-spacing:.1em;color:var(--ash)}
+/* 暦の段。新暦と旧暦は同じ日を二通りに言ったものゆえ、横に並べる */
+.sky-cal{
+  max-width:262px;margin:14px auto 0;padding-top:11px;border-top:1px solid #0000000f;
+  display:flex;align-items:baseline;justify-content:center;gap:11px;
+}
+.sky-cal .sky-lunar{position:relative;padding-left:12px}
+.sky-cal .sky-lunar::before{
+  content:"";position:absolute;left:0;top:1px;bottom:1px;width:1px;background:#00000018;
+}
+#sky-name{margin-top:12px;font-size:20px;font-weight:700;letter-spacing:.14em;color:var(--amber-dk)}
 #sky-sub{margin-top:6px;font-size:11.5px;letter-spacing:.08em;color:var(--ash)}
-#sky-sub b{font-family:"Comic Relief","Comic Neue",system-ui;font-size:14px;margin:0 2px;color:var(--ink)}
-#sky-sub em{font-style:normal;color:var(--amber-dk);font-weight:700;margin-left:2px}
+#sky-sub b{font-family:"Comic Relief","Comic Neue",system-ui;font-weight:400;font-size:14px;margin:0 2px;color:inherit}
+#sky-sub em{font-style:normal;font-weight:400;color:inherit;margin-left:2px}
 #sky-next{max-width:262px;margin:8px auto 0;font-size:10.5px;line-height:1.75;letter-spacing:.04em;color:var(--ash)}
-#sky-sekki{max-width:262px;margin:7px auto 0;padding-top:7px;border-top:1px solid #0000000f;
+#sky-sekki{max-width:262px;margin:7px auto 0;
   font-size:10.5px;line-height:1.75;letter-spacing:.04em;color:var(--ash)}
-#sky-sekki b{font-weight:700;color:var(--amber-dk)}
-#sky-next b{font-family:"Comic Relief","Comic Neue",system-ui;font-size:13px;color:var(--ink);margin:0 2px}
+#sky-sekki b{font-weight:400;color:inherit}
+#sky-next b{font-family:"Comic Relief","Comic Neue",system-ui;font-weight:400;font-size:13px;color:inherit;margin:0 2px}
 #sky-close{
   display:block;width:100%;margin-top:14px;padding:9px 0;border:none;border-radius:12px;
   background:#00000008;color:var(--ash);font:inherit;font-size:11.5px;letter-spacing:.14em;cursor:pointer;
@@ -383,7 +428,39 @@ dl{margin:0}
     </div>
   </section>
 
-  <div class="foot">体重データ：2026年2-8月 6周期（ロキソ期除外）<br>潮見帳 v2</div>
+  <div class="foot" role="button" tabindex="0" aria-label="この帳面について">体重データ：2026年2-8月 6周期（ロキソ期除外）<br>潮見帳 v2</div>
+</div>
+
+<div id="info" role="dialog" aria-modal="true" aria-label="この帳面について">
+  <div class="info-box">
+    <img id="info-art" alt="">
+    <h3>潮見帳とは</h3>
+    <p>身体の水の満ち引きを「潮」に見立てて、今日が周期のどこにいるかを確かめるための帳面である。記録を付ける道具ではない。開いて、確かめて、閉じる。それだけでよい。設定はこの端末の中にだけ残る。</p>
+
+    <h3>四つの帯</h3>
+    <p>生理期は開始から七日、黄体期は次の潮から遡って十四日を当てている。周期の長さを変えると、伸び縮みするのは卵胞期──実際の身体もそう動く。</p>
+
+    <h3>数字の出処</h3>
+    <p>症状・体重・危険ゾーンは一般論ではない。二〇二六年二月から八月まで、六周期分の記録（ロキソニン服用期を除く）を周期日に照らし合わせて拾い上げたものである。眠気、偏頭痛、食欲、便通、浮腫み、体重の推移。</p>
+    <p>だから当たる日もあれば、外れる日もある。外れた日は、外れたという記録になる。</p>
+
+    <hr>
+
+    <h3>旧暦</h3>
+    <p>朔（新月）の日が一日、次の朔の前日が晦。月の運行そのものを暦にしたものである。だから旧暦の日と月の呼び名は、同じものを二通りに言っているに過ぎぬ。<br>十五夜は満月の別名ではなく、旧暦十五日の夜という意味である。月の速さは一定ではないゆえ、望（満月）は十五日から一日二日ずれる。</p>
+
+    <h3>二十四節気</h3>
+    <p>太陽の位置を十五度ずつ刻んだ二十四の区切り。立春が起点である。三十度ごとの区切りを中気と呼び、旧暦の月を立てるのにも使う。冬至を含む月が十一月、中気を含まぬ月が閏月になる。</p>
+
+    <h3>潮回り</h3>
+    <p>大潮・中潮・小潮・長潮・若潮の五つ。月と太陽の引きが重なる新月・満月の頃が大潮、直角に離れる上弦・下弦の頃が小潮。長潮と若潮は、小潮から大潮へ戻る変わり目に付いた名である。</p>
+
+    <hr>
+
+    <p class="info-note">二匹はつつくと返事をする。</p>
+
+    <button id="info-close">閉じる</button>
+  </div>
 </div>
 
 <div id="sky" role="dialog" aria-modal="true" aria-label="今夜の月">
@@ -402,11 +479,14 @@ dl{margin:0}
       </svg>
       <img id="sky-pair" alt="月を見上げるテンとウサギ">
     </div>
-    <div class="sky-lead" id="sky-date"></div>
-    <div class="sky-lunar" id="sky-lunar"></div>
     <div id="sky-name"></div>
     <div id="sky-sub"></div>
     <div id="sky-next"></div>
+
+    <div class="sky-cal">
+      <span class="sky-lead" id="sky-date"></span>
+      <span class="sky-lunar" id="sky-lunar"></span>
+    </div>
     <div id="sky-sekki"></div>
     <button id="sky-close">閉じる</button>
   </div>
@@ -434,23 +514,11 @@ dl{margin:0}
     <button id="close-btn" aria-label="閉じる">×</button>
     <img id="pair" alt="満月の下に並ぶテンとウサギ">
 
-    <h2>潮見帳とは</h2>
-    <p>身体の水の満ち引きを「潮」に見立てて、今日が周期のどこにいるかを確かめるための帳面である。</p>
-    <p>直近の生理開始日と周期の長さを入力する。あとは日付が勝手に進む。設定はこの端末の中にだけ残る。</p>
-
-    <h2>四つの帯</h2>
-    <p>生理期・卵胞期・黄体期前半・黄体期後半。<br>生理期は開始から7日、黄体期は生理予定日から遡って14日を当てている。周期の長さを変えると、伸び縮みするのは卵胞期──実際の身体もそう動く。</p>
-
-    <h2>傾向について</h2>
-    <p>ここに並ぶ症状・体重・危険ゾーンは、一般論ではない。2026年2月から8月までの記録──眠気、偏頭痛、食欲、便通、浮腫み、体重の推移──を周期日に照らし合わせて拾い上げたものである。だから当たる日もあれば、外れる日もある。外れた日は、外れたという記録になる。</p>
-
-    <hr>
 
 
 
-    <h2>ウサギとテンの話</h2>
     <div class="story">
-<p>月の下に暮らす一匹のウサギがいた。</p>
+<p>月の下に暮らす、一匹のウサギがいた。</p>
 <p>満ちる月の下では耳がぴんと立ち、足取りも軽い。欠けていく月の下では耳が垂れ、身体が重くなる。新月の夜には、丸くなってじっとしている。</p>
 
 <p>ウサギはずっと、それを自分のせいだと思っていた。<br>
@@ -517,7 +585,10 @@ const IMG = {
   rE:"shiomi_assets/rabbit_endure.png",    // ウサギ・耐え
   pair:"shiomi_assets/pair.png",           // 並び絵（説明画面の頭）
   pairRead:"shiomi_assets/pair-2.png",     // 二匹で読む
-  pairSky:"shiomi_assets/pair-6.png"       // 後ろ姿・月を見上げる（今夜の月）
+  pairSky:"shiomi_assets/pair-6.png",      // 後ろ姿・月を見上げる（今夜の月）
+  pairPat:"shiomi_assets/pair-1.png",      // 撫でる（この帳面について）
+  pairJump:"shiomi_assets/pair-3.png",     // 跳ねる（つついた時）
+  pairSnack:"shiomi_assets/pair-4.png"     // おやつ（十五夜）
 };
 
 /* ================= 周期データ ================= */
@@ -531,8 +602,12 @@ const PHASES = [
     weight:"周期内で最も重い時期（平均 53.79kg）。Day 6-7 にかけて下がり始める。",
     note:"クラムシェル・レクサプロ開始後、偏頭痛は生理前からこの時期へ後ろにずれた。症状自体も軽くなっている。",
     hint:"▽",
-    talkM:["無理をするな","血を作るのに、鉄が要る","眠いなら寝よ。それが今日の仕事である","よく持ちこたえている"],
-    talkR:["ふぅ…","おなかが、おもい","うごきたくない…","ねむい","うーん…","…あったかい"],
+    talkM:["無理をするな","血を作るのに、鉄が要る","眠いなら寝よ。それが今日の仕事である",
+           "よく持ちこたえている","潮が引いている。減らす時ではない","動けぬ日を数に入れるな",
+           "湯に浸かるとよい","今は作り直している最中である","頭が痛むなら、暗くして休め",
+           "何もせぬ日があってよい"],
+    talkR:["ふぅ…","おなかが、おもい","うごきたくない…","ねむい","うーん…","…あったかい",
+           "おふとん…","さむい","あたまいたい","きょうは、やすむ","まだうごけない"],
     advice:"身体が血を作り直している最中である。鉄の消耗が激しい時期ゆえ、ヘム鉄の摂取を怠るな。HIT は無理に入れずとも、ルーティンを通すだけで十分。眠い時は眠い。意志の問題ではない。"
   },
   {
@@ -544,8 +619,12 @@ const PHASES = [
     weight:"体重が落ち着く時期（平均 53.68kg）。水分変動が少なく、BIA 計測値も安定。",
     note:"ただし生理中の症状が後倒しになって食い込むことがある（Day 9-12 に強い眠気など）。凪いでいるはずの帯で不調が出ても、異常ではない。",
     hint:"♪",
-    talkM:["今日は行ける","風が凪いでいる","試すなら、この帯である","身体が応える時期だ"],
-    talkR:["なんかいける！","あしがかるい","はねたい","きょうはいいひ"],
+    talkM:["今日は行ける","風が凪いでいる","試すなら、この帯である","身体が応える時期だ",
+           "風向きがよい。舵を切るなら今である","新しい道を試してみよ","身体が軽いはずだ",
+           "この帯は長くは続かぬ。使え","よく戻ってきた"],
+    talkR:["なんかいける！","あしがかるい","はねたい","きょうはいいひ",
+           "そとにいきたい","ちょっとはしってみる","みみがぴんとしてる","たのしい",
+           "なんでもできそう"],
     advice:"攻めてよい時期である。HIT の負荷を上げる、新しいメニューを試す、バイクの時間を伸ばす──やるならここ。身体が応えるだろう。"
   },
   {
@@ -557,8 +636,12 @@ const PHASES = [
     weight:"体重は安定圏（平均 53.73kg）。腸の動きが鈍って滞留が始まる。",
     note:"顕著な症状の報告が少ない帯である。データが薄いだけで、静かとは限らぬ。",
     hint:"△",
-    talkM:["飯を食え。菓子ではない","眠いのは代謝が上がっている証である","今日は守りでよい","腹が減るのは道理である"],
-    talkR:["おこめたべたい","ねむいー…","おなかすいた","なんかもやもやする"],
+    talkM:["飯を食え。菓子ではない","眠いのは代謝が上がっている証である","今日は守りでよい",
+           "腹が減るのは道理である","潮が満ちてくる。抗うな","夜に甘味が暴れる前に、飯を食え",
+           "眠いのは怠けではない","水を飲め。腸が滞る頃である","ここは備えの帯である"],
+    talkR:["おこめたべたい","ねむいー…","おなかすいた","なんかもやもやする",
+           "あまいものたべたい","おなかがはってる","まだねてたい","しおからいのもすき",
+           "そわそわする"],
     advice:"食欲が増すのは代謝が上がっている証でもある。白米を抜くと夜の甘味欲が暴れやすい。米を食べよ。菓子より飯。"
   },
   {
@@ -570,8 +653,13 @@ const PHASES = [
     weight:"Day 22 で周期内最低値（平均 53.22kg）を記録した後、生理に向けて約 0.8kg 上昇。これは脂肪ではなく水である。",
     note:"眠気・倦怠感は Day 24-26 に集中。「意識が奥に引っ込む」感覚が出る帯でもある。",
     hint:"×",
-    talkM:["…そばにいる","意志の問題ではない。ホルモンである","するめを噛め","この帯を越えれば、潮が変わる"],
-    talkR:["なんだかかなしい","なにもしたくない","ぎゅってして","からだがおもい"],
+    talkM:["…そばにいる","意志の問題ではない。ホルモンである","するめを噛め",
+           "この帯を越えれば、潮が変わる","嵐は必ず過ぎる","今日できぬことは、明日でよい",
+           "浮腫みは水である。脂ではない","腱が脆い頃だ。無理な負荷はかけるな",
+           "貴殿が弱いのではない。潮が高いのである"],
+    talkR:["なんだかかなしい","なにもしたくない","ぎゅってして","からだがおもい",
+           "むくんでる","りゆうもなく、なきそう","そばにいてほしい",
+           "あたまのなかがとおい","はやく、しおがひいてほしい"],
     advice:"……ここが最も辛い帯である。普段抑えている不安が浮上するのは、意志が弱いからではない。ホルモンが防御壁を下げている。"
   }
 ];
@@ -882,7 +970,7 @@ const SEKKI = [
   ["小満","草木が茂り、命が満ち始める頃"],
   ["芒種","芒のある穀物を蒔く頃。梅雨が近い"],
   ["夏至","一年で最も昼が長い日"],
-  ["小暑","梅雨が明け、暑さが本格になる頃"],
+  ["小暑","梅雨が明け、暑さが本格化する頃"],
   ["大暑","一年で最も暑さの厳しい頃"],
   ["立秋","暦の上の秋の始まり。残暑の盛り"],
   ["処暑","暑さが収まり始める頃"],
@@ -912,17 +1000,17 @@ function fmtLunar(l){
 /* 夜の呼び名。旧暦の日 ＝ 月齢の切り上げ（新月の夜が一日目） */
 const MOON_NAMES = ["", "新月", "二日月", "三日月", "四日の月", "五日の月",
   "六日の月", "七日の月", "上弦の月", "九日の月", "十日夜の月", "十一日の月",
-  "十二日の月", "十三夜の月", "小望月", "十五夜", "十六夜", "立待月", "居待月",
+  "十二日の月", "十三夜月", "小望月", "十五夜", "十六夜", "立待月", "居待月",
   "寝待月", "更待月", "二十一日の月", "二十二日の月", "下弦の月", "二十四日の月",
   "二十五日の月", "二十六夜", "二十七日の月", "二十八日の月", "二十九日の月", "晦の月"];
 
 /* 潮回り。旧暦の日から引く昔ながらの割り当て */
 /* 潮回りの短い注。月齢との繋がりが分かるように書く */
 const TIDE_NOTE = {
-  "大潮":"新月と満月の前後。満ち引きが最も大きい",
+  "大潮":"新月と満月の前後。干満の差が最も大きい",
   "中潮":"大潮と小潮のあいだ。潮は中ほど",
-  "小潮":"上弦・下弦の頃。満ち引きが小さい",
-  "長潮":"小潮の終わり。満ち引きが最も鈍る",
+  "小潮":"上弦・下弦の頃。干満の差が小さい",
+  "長潮":"小潮の終わり。干満の差が最も少ない",
   "若潮":"長潮の翌日。潮が再び大きくなり始める"
 };
 
@@ -938,7 +1026,8 @@ function drawSky(){
   const night = Math.min(30, lunar.day);      // 呼び名も潮も旧暦の日で引く
 
   document.querySelector("#bigmoon .lit").setAttribute("d", moonPath(lunar.frac, 52));
-  if(!$("sky-pair").src) $("sky-pair").src = IMG.pairSky;
+  skyBase = (lunar.day === 15) ? IMG.pairSnack : IMG.pairSky;   // 十五夜は月より団子
+  $("sky-pair").src = skyBase;
 
   const tide = TIDES[night];
   $("sky-date").textContent = fmtToday(now);
@@ -948,6 +1037,16 @@ function drawSky(){
   $("sky-next").textContent = "【 " + tide + " 】" + (TIDE_NOTE[tide] || "");
   const sk = sekkiOf(toJD(now.getTime()));
   $("sky-sekki").innerHTML = "【 <b>" + sk[0] + "</b> 】" + sk[1];
+}
+
+let skyBase = "", skyHopTimer = null;
+/* 二匹をつつくと一瞬だけ跳ねる */
+function pokeSky(){
+  const el = $("sky-pair");
+  el.src = IMG.pairJump;
+  el.classList.remove("hop"); void el.offsetWidth; el.classList.add("hop");
+  clearTimeout(skyHopTimer);
+  skyHopTimer = setTimeout(() => { el.src = skyBase; el.classList.remove("hop"); }, 1300);
 }
 
 function openSky(){
@@ -1055,6 +1154,20 @@ $("marten").addEventListener("click", e => speak("m", e.currentTarget));
 $("rabbit").addEventListener("click", e => speak("r", e.currentTarget));
 
 $("moon").addEventListener("click", openSky);
+function openInfo(){
+  if(!$("info-art").src) $("info-art").src = IMG.pairPat;
+  $("info").classList.add("on");
+  document.body.style.overflow = "hidden";
+}
+function closeInfo(){
+  $("info").classList.remove("on");
+  document.body.style.overflow = "";
+}
+document.querySelector(".foot").addEventListener("click", openInfo);
+$("info-close").addEventListener("click", closeInfo);
+$("info").addEventListener("click", e => { if(e.target.id === "info") closeInfo(); });
+
+$("sky-pair").addEventListener("click", pokeSky);
 $("sky-close").addEventListener("click", closeSky);
 $("sky").addEventListener("click", e => { if(e.target.id === "sky") closeSky(); });
 
