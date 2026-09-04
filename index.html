@@ -300,10 +300,46 @@ dl{margin:0}
 #cal-grid .cell{
   position:relative;aspect-ratio:1/0.76;border-radius:8px;
   display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;
+  cursor:pointer;-webkit-tap-highlight-color:transparent;
 }
+#cal-grid .cell:active{filter:brightness(.94)}
 #cal-grid .cell .d{font-size:12px;color:var(--ink);opacity:.9;line-height:1}
 #cal-grid .cell.today .d{font-weight:700;opacity:1}
 #cal-grid .cell i{width:4px;height:4px;border-radius:50%;display:block}
+/* 体調アイコン（セル右下からはみ出して乗る） */
+#cal-grid .cell .mood{
+  position:absolute;right:-3px;bottom:-3px;width:16px;height:16px;
+  display:flex;align-items:center;justify-content:center;
+  font-size:10px;line-height:1;z-index:2;
+  filter:drop-shadow(0 1px 2px #00000018);
+}
+#cal-grid .cell .mood img{width:100%;height:100%;object-fit:contain}
+#cal-grid .cell{overflow:visible}
+
+/* ムードピッカー */
+#mood-picker{
+  position:absolute;z-index:80;
+  background:var(--card);border:1.5px solid #0000001a;border-radius:14px;
+  box-shadow:0 4px 16px #00000020;
+  padding:6px 8px;display:none;
+  gap:4px;align-items:center;
+}
+#mood-picker.on{display:flex}
+#mood-picker button{
+  width:32px;height:32px;border:2px solid transparent;border-radius:10px;
+  background:none;cursor:pointer;padding:2px;
+  display:grid;place-items:center;font-size:16px;
+  transition:border-color .15s,background .15s;
+}
+#mood-picker button:active{background:#00000008}
+#mood-picker button.sel{border-color:var(--amber);background:var(--amber)12}
+#mood-picker button img{width:22px;height:22px;object-fit:contain}
+#mood-picker .clear{
+  width:24px;height:24px;border:none;border-radius:50%;
+  background:#00000008;cursor:pointer;padding:0;
+  font-size:11px;color:var(--ash);display:grid;place-items:center;
+  margin-left:2px;
+}
 .cal-foot{display:flex;align-items:center;gap:10px;margin-top:10px}
 #cal-legend {
   flex: 1;
@@ -501,6 +537,12 @@ dl{margin:0}
     </div>
     <div class="cal-dow"><span>日</span><span>月</span><span>火</span><span>水</span><span>木</span><span>金</span><span>土</span></div>
     <div id="cal-grid"></div>
+    <div id="mood-picker" aria-label="体調を記録">
+      <button data-mood="good" title="調子よい">♪</button>
+      <button data-mood="ok" title="ふつう">△</button>
+      <button data-mood="bad" title="つらい">×</button>
+      <button class="clear" data-mood="" title="消す">−</button>
+    </div>
     <div class="cal-foot">
       <div id="cal-legend"></div>
       <img id="cal-art" alt="">
@@ -666,6 +708,7 @@ const PHASES = [
 
 /* ================= 保存 ================= */
 const KEY = "shiomi-settings";
+const MOOD_KEY = "shiomi-mood";
 const DEFAULTS = {startDate:"2026-08-23", cycleLength:28};
 
 function load(){
@@ -683,6 +726,25 @@ function clampCycle(n){
   if(!n || isNaN(n)) return 28;
   return Math.min(45, Math.max(20, n));
 }
+
+/* ---- 体調記録 ---- */
+const MOOD_LABELS = {good:"♪", ok:"△", bad:"×"};
+/* 将来画像に差し替える場合はここを変える:
+   const MOOD_LABELS = {good:'<img src="shiomi_assets/mood_good.png">',
+                        ok:'<img src="shiomi_assets/mood_ok.png">',
+                        bad:'<img src="shiomi_assets/mood_bad.png">'};  */
+
+let moodData = {};
+function loadMood(){
+  try{ moodData = JSON.parse(localStorage.getItem(MOOD_KEY)) || {}; }catch(e){ moodData = {}; }
+}
+function saveMood(){
+  try{ localStorage.setItem(MOOD_KEY, JSON.stringify(moodData)); }catch(e){}
+}
+function dateKey(y, m, d){
+  return y + "-" + String(m + 1).padStart(2, "0") + "-" + String(d).padStart(2, "0");
+}
+loadMood();
 
 /* ================= 周期計算 ================= */
 const DAY_MS = 86400000;
@@ -1062,6 +1124,8 @@ function closeSky(){
 /* ================= 暦 ================= */
 let calMonth = null;   // 表示中の月の一日
 
+let pickerTarget = null;   // 現在ピッカーが開いている日のキー
+
 function drawCal(){
   const y = calMonth.getFullYear(), m = calMonth.getMonth();
   $("cal-title").textContent = y + "年 " + (m + 1) + "月";
@@ -1069,24 +1133,41 @@ function drawCal(){
   const today = midnight(new Date()).getTime();
   const g = $("cal-grid");
   g.innerHTML = "";
+  closePicker();
   for(let i = 0; i < first.getDay(); i++) g.appendChild(document.createElement("div"));
   for(let d = 1; d <= lastDay; d++){
     const date = new Date(y, m, d);
     const cd = cycleDayOf(date);
     const ph = PHASES[phaseIndexOf(cd, settings.cycleLength)];
+    const key = dateKey(y, m, d);
     const cell = document.createElement("div");
     cell.className = "cell" + (date.getTime() === today ? " today" : "");
     cell.style.background = ph.color + "30";
     if(date.getTime() === today) cell.style.boxShadow = "inset 0 0 0 2px " + ph.color;
     cell.title = ph.name + "　Day " + cd;
+    cell.dataset.key = key;
     const n = document.createElement("span");
     n.className = "d num"; n.textContent = d;
     cell.appendChild(n);
-    if(cd === 1){                       // 潮の始まり
+    if(cd === 1){
       const dot = document.createElement("i");
       dot.style.background = ph.color;
       cell.appendChild(dot);
     }
+    // 体調アイコンを表示
+    const mood = moodData[key];
+    if(mood && MOOD_LABELS[mood]){
+      const mk = document.createElement("span");
+      mk.className = "mood";
+      mk.innerHTML = MOOD_LABELS[mood];
+      mk.style.transform = "rotate(" + (Math.random() * 24 - 12) + "deg)";
+      cell.appendChild(mk);
+    }
+    // タップでピッカーを開く
+    cell.addEventListener("click", function(e){
+      e.stopPropagation();
+      openPicker(this, key);
+    });
     g.appendChild(cell);
   }
   const lg = $("cal-legend");
@@ -1123,6 +1204,56 @@ function shiftMonth(n){
   calMonth.setMonth(calMonth.getMonth() + n);
   drawCal();
 }
+
+/* ---- ムードピッカー ---- */
+function openPicker(cell, key){
+  const pk = $("mood-picker");
+  // 同じセルを再タップしたら閉じる
+  if(pickerTarget === key && pk.classList.contains("on")){
+    closePicker(); return;
+  }
+  pickerTarget = key;
+  // ピッカーの位置をセルの下に合わせる
+  const grid = $("cal-grid");
+  const gr = grid.getBoundingClientRect();
+  const cr = cell.getBoundingClientRect();
+  pk.style.left = Math.max(4, Math.min(cr.left - gr.left, gr.width - 160)) + "px";
+  pk.style.top = (cr.bottom - gr.top + 4) + "px";
+  // 現在の値をハイライト
+  const cur = moodData[key] || "";
+  pk.querySelectorAll("button[data-mood]").forEach(b => {
+    b.classList.toggle("sel", b.dataset.mood === cur);
+  });
+  pk.classList.add("on");
+}
+function closePicker(){
+  $("mood-picker").classList.remove("on");
+  pickerTarget = null;
+}
+
+// ピッカーのボタンをクリック
+$("mood-picker").addEventListener("click", function(e){
+  const btn = e.target.closest("button[data-mood]");
+  if(!btn || !pickerTarget) return;
+  e.stopPropagation();
+  const mood = btn.dataset.mood;
+  if(mood){
+    moodData[pickerTarget] = mood;
+  } else {
+    delete moodData[pickerTarget];
+  }
+  saveMood();
+  closePicker();
+  drawCal();
+});
+
+// カレンダー外タップでピッカーを閉じる
+document.addEventListener("click", function(e){
+  if(!$("mood-picker").classList.contains("on")) return;
+  if(!e.target.closest("#mood-picker") && !e.target.closest("#cal-grid .cell")){
+    closePicker();
+  }
+});
 
 /* ================= 操作 ================= */
 $("start").value = settings.startDate;
