@@ -1,6 +1,6 @@
 // 潮見帳 Service Worker
 // キャッシュ名の数字を上げると、次回起動時に中身が入れ替わる
-const CACHE = "shiomi-v8";
+const CACHE = "shiomi-v9";
 
 const CORE = [
   "./", "./index.html", "./manifest.json", "./icon-192.png", "./icon-512.png",
@@ -20,7 +20,10 @@ const CORE = [
   "./shiomi_assets/pair-3.png",
   "./shiomi_assets/pair-4.png",
   "./shiomi_assets/pair-5.png",
-  "./shiomi_assets/pair-6.png"
+  "./shiomi_assets/pair-6.png",
+  "./shiomi_assets/mood_good.png",
+  "./shiomi_assets/mood_ok.png",
+  "./shiomi_assets/mood_bad.png"
 ];
 
 self.addEventListener("install", e => {
