@@ -237,15 +237,15 @@ dl{margin:0}
 #bigmoon{position:absolute;top:12px;left:50%;transform:translateX(-50%);width:62px;height:62px;overflow:visible}
 #bigmoon .disc{fill:#1a2744;stroke:#1a2744;stroke-width:0}
 #bigmoon .lit{fill:var(--moon);filter:drop-shadow(0 0 12px #f0d87877)}
-#sky-pair{position:absolute;left:50%;bottom:0;transform:translateX(-50%);
-  height:107px;width:auto;cursor:pointer;transition:transform .2s ease}
+#sky-pair{position:absolute;left:0;right:0;bottom:0;margin:0 auto;
+  height:107px;width:auto;cursor:pointer}
 #sky-pair.hop{animation:skyHop .5s ease}
 @keyframes skyHop{
-  0%{transform:translateX(-50%) translateY(0)}
-  30%{transform:translateX(-50%) translateY(-9px)}
-  55%{transform:translateX(-50%) translateY(0)}
-  75%{transform:translateX(-50%) translateY(-4px)}
-  100%{transform:translateX(-50%) translateY(0)}
+  0%{transform:translateY(0)}
+  30%{transform:translateY(-9px)}
+  55%{transform:translateY(0)}
+  75%{transform:translateY(-4px)}
+  100%{transform:translateY(0)}
 }
 .sky-lead{font-size:11.5px;letter-spacing:.08em;color:var(--ash)}
 .sky-lunar{font-size:10.5px;letter-spacing:.1em;color:var(--ash)}
@@ -646,11 +646,11 @@ const PHASES = [
     note:"クラムシェル・レクサプロ開始後、偏頭痛は生理前からこの時期へ後ろにずれた。症状自体も軽くなっている。",
     hint:"▽",
     talkM:["無理をするな","血を作るのに、鉄が要る","眠いなら寝よ。それが今日の仕事である",
-           "よく持ちこたえている","潮が引いている。減らす時ではない","動けぬ日を数に入れるな",
+           "よく持ちこたえている","潮が引いている","動けぬ日を数に入れるな",
            "湯に浸かるとよい","今は作り直している最中である","頭が痛むなら、暗くして休め",
            "何もせぬ日があってよい"],
     talkR:["ふぅ…","おなかが、おもい","うごきたくない…","ねむい","うーん…","…あったかい",
-           "おふとん…","さむい","あたまいたい","きょうは、やすむ","まだうごけない"],
+           "おふとん…","まぶしい","あたまいたい","きょうは、やすむ","まだうごけない"],
     advice:"身体が血を作り直している最中である。鉄の消耗が激しい時期ゆえ、ヘム鉄の摂取を怠るな。HIT は無理に入れずとも、ルーティンを通すだけで十分。眠い時は眠い。意志の問題ではない。"
   },
   {
@@ -663,10 +663,10 @@ const PHASES = [
     note:"ただし生理中の症状が後倒しになって食い込むことがある（Day 9-12 に強い眠気など）。凪いでいるはずの帯で不調が出ても、異常ではない。",
     hint:"♪",
     talkM:["今日は行ける","風が凪いでいる","試すなら、この帯である","身体が応える時期だ",
-           "風向きがよい。舵を切るなら今である","新しい道を試してみよ","身体が軽いはずだ",
-           "この帯は長くは続かぬ。使え","よく戻ってきた"],
+           "風向きがよい","新しい道を試してみよ","身体が軽いはずだ",
+           "使え。長くは続かぬぞ","よく戻ってきた"],
     talkR:["なんかいける！","あしがかるい","はねたい","きょうはいいひ",
-           "そとにいきたい","ちょっとはしってみる","みみがぴんとしてる","たのしい",
+           "そとにいきたい","あそぼ！","みみがぴんとしてる","たのしい",
            "なんでもできそう"],
     advice:"攻めてよい時期である。HIT の負荷を上げる、新しいメニューを試す、バイクの時間を伸ばす──やるならここ。身体が応えるだろう。"
   },
@@ -683,7 +683,7 @@ const PHASES = [
            "腹が減るのは道理である","潮が満ちてくる。抗うな","夜に甘味が暴れる前に、飯を食え",
            "眠いのは怠けではない","水を飲め。腸が滞る頃である","ここは備えの帯である"],
     talkR:["おこめたべたい","ねむいー…","おなかすいた","なんかもやもやする",
-           "あまいものたべたい","おなかがはってる","まだねてたい","しおからいのもすき",
+           "あまいものたべたい","おなかがはってる","まだねてたい","しょっぱいのすき",
            "そわそわする"],
     advice:"食欲が増すのは代謝が上がっている証でもある。白米を抜くと夜の甘味欲が暴れやすい。米を食べよ。菓子より飯。"
   },
@@ -698,11 +698,11 @@ const PHASES = [
     hint:"×",
     talkM:["…そばにいる","意志の問題ではない。ホルモンである","するめを噛め",
            "この帯を越えれば、潮が変わる","嵐は必ず過ぎる","今日できぬことは、明日でよい",
-           "浮腫みは水である。脂ではない","腱が脆い頃だ。無理な負荷はかけるな",
+           "浮腫みは水である。脂ではない","脆い頃だ。無理はするな",
            "貴殿が弱いのではない。潮が高いのである"],
     talkR:["なんだかかなしい","なにもしたくない","ぎゅってして","からだがおもい",
-           "むくんでる","りゆうもなく、なきそう","そばにいてほしい",
-           "あたまのなかがとおい","はやく、しおがひいてほしい"],
+           "むくんでる","……","そばにいてほしい",
+           "こえがとおい…","はやく、ひいてほしい"],
     advice:"……ここが最も辛い帯である。普段抑えている不安が浮上するのは、意志が弱いからではない。ホルモンが防御壁を下げている。"
   }
 ];
@@ -1129,7 +1129,12 @@ function pokeSky(){
   skyHopTimer = setTimeout(() => { el.src = skyBase; el.classList.remove("hop"); }, 1300);
 }
 
+let skyWarmed = false;
 function openSky(){
+  if(!skyWarmed){          // 跳ねる絵・団子の絵を先に読ませておく
+    skyWarmed = true;
+    [IMG.pairJump, IMG.pairSnack].forEach(u => { const i = new Image(); i.src = u; });
+  }
   drawSky();
   $("sky").classList.add("on");
   document.body.style.overflow = "hidden";
