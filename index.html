@@ -280,6 +280,7 @@ dl{margin:0}
 }
 #cal.on{opacity:1;visibility:visible}
 .cal-box{
+  position:relative;   /* ピッカーの位置の基準 */
   width:100%;max-width:376px;max-height:94vh;overflow-y:auto;
   background:var(--bg);border-radius:20px;padding:12px 12px 10px;
   box-shadow:0 10px 34px #0000002e;
@@ -308,7 +309,7 @@ dl{margin:0}
 #cal-grid .cell i{width:4px;height:4px;border-radius:50%;display:block}
 /* 体調アイコン（セル右下からはみ出して乗る） */
 #cal-grid .cell .mood{
-  position:absolute;right:-3px;bottom:-3px;width:16px;height:16px;
+  position:absolute;right:-3px;bottom:-2px;width:22px;height:22px;
   display:flex;align-items:center;justify-content:center;
   font-size:10px;line-height:1;z-index:2;
   filter:drop-shadow(0 1px 2px #00000018);
@@ -332,7 +333,7 @@ dl{margin:0}
   transition:border-color .15s,background .15s;
 }
 #mood-picker button:active{background:#00000008}
-#mood-picker button.sel{border-color:var(--amber);background:var(--amber)12}
+#mood-picker button.sel{border-color:var(--amber);background:#dba14518}
 #mood-picker button img{width:22px;height:22px;object-fit:contain}
 #mood-picker .clear{
   width:24px;height:24px;border:none;border-radius:50%;
@@ -538,9 +539,9 @@ dl{margin:0}
     <div class="cal-dow"><span>日</span><span>月</span><span>火</span><span>水</span><span>木</span><span>金</span><span>土</span></div>
     <div id="cal-grid"></div>
     <div id="mood-picker" aria-label="体調を記録">
-      <button data-mood="good" title="調子よい">♪</button>
-      <button data-mood="ok" title="ふつう">△</button>
-      <button data-mood="bad" title="つらい">×</button>
+      <button data-mood="good" title="調子よい"><img src="shiomi_assets/mood_good.png" alt="調子よい"></button>
+      <button data-mood="ok" title="ふつう"><img src="shiomi_assets/mood_ok.png" alt="ふつう"></button>
+      <button data-mood="bad" title="つらい"><img src="shiomi_assets/mood_bad.png" alt="つらい"></button>
       <button class="clear" data-mood="" title="消す">−</button>
     </div>
     <div class="cal-foot">
@@ -728,11 +729,10 @@ function clampCycle(n){
 }
 
 /* ---- 体調記録 ---- */
-const MOOD_LABELS = {good:"♪", ok:"△", bad:"×"};
-/* 将来画像に差し替える場合はここを変える:
+
    const MOOD_LABELS = {good:'<img src="shiomi_assets/mood_good.png">',
                         ok:'<img src="shiomi_assets/mood_ok.png">',
-                        bad:'<img src="shiomi_assets/mood_bad.png">'};  */
+                        bad:'<img src="shiomi_assets/mood_bad.png">'};
 
 let moodData = {};
 function loadMood(){
@@ -743,6 +743,24 @@ function saveMood(){
 }
 function dateKey(y, m, d){
   return y + "-" + String(m + 1).padStart(2, "0") + "-" + String(d).padStart(2, "0");
+}
+/* 傾きは日付から決める。乱数だと描き直すたびに全部の絵が動いてしまう */
+function moodTilt(key){
+  let h = 0;
+  for(let i = 0; i < key.length; i++) h = (h * 31 + key.charCodeAt(i)) | 0;
+  return ((h % 25) + 25) % 25 - 12;   // -12〜+12度
+}
+/* その一マスの体調印だけを描き直す */
+function paintMood(cell, key){
+  const old = cell.querySelector(".mood");
+  if(old) old.remove();
+  const mood = moodData[key];
+  if(!mood || !MOOD_LABELS[mood]) return;
+  const mk = document.createElement("span");
+  mk.className = "mood";
+  mk.innerHTML = MOOD_LABELS[mood];
+  mk.style.transform = "rotate(" + moodTilt(key) + "deg)";
+  cell.appendChild(mk);
 }
 loadMood();
 
@@ -1154,15 +1172,7 @@ function drawCal(){
       dot.style.background = ph.color;
       cell.appendChild(dot);
     }
-    // 体調アイコンを表示
-    const mood = moodData[key];
-    if(mood && MOOD_LABELS[mood]){
-      const mk = document.createElement("span");
-      mk.className = "mood";
-      mk.innerHTML = MOOD_LABELS[mood];
-      mk.style.transform = "rotate(" + (Math.random() * 24 - 12) + "deg)";
-      cell.appendChild(mk);
-    }
+    paintMood(cell, key);
     // タップでピッカーを開く
     cell.addEventListener("click", function(e){
       e.stopPropagation();
@@ -1213,12 +1223,27 @@ function openPicker(cell, key){
     closePicker(); return;
   }
   pickerTarget = key;
-  // ピッカーの位置をセルの下に合わせる
-  const grid = $("cal-grid");
-  const gr = grid.getBoundingClientRect();
+
+  // 位置決め。基準は .cal-box（ピッカーの親の位置基準）に揃える
+  const box = document.querySelector(".cal-box");
+  const br = box.getBoundingClientRect();
   const cr = cell.getBoundingClientRect();
-  pk.style.left = Math.max(4, Math.min(cr.left - gr.left, gr.width - 160)) + "px";
-  pk.style.top = (cr.bottom - gr.top + 4) + "px";
+  pk.style.visibility = "hidden";      // 大きさを測るために一度出す
+  pk.classList.add("on");
+  const pw = pk.offsetWidth, ph2 = pk.offsetHeight;
+
+  // 横：セルの真下に中央を合わせ、窓の内側に収める
+  let left = cr.left + cr.width / 2 - br.left - pw / 2 + box.scrollLeft;
+  left = Math.max(6, Math.min(left, box.clientWidth - pw - 6));
+
+  // 縦：下に出す。はみ出すならセルの上へ回す
+  let top = cr.bottom - br.top + box.scrollTop + 6;
+  if(cr.bottom + 6 + ph2 > br.bottom - 6){
+    top = cr.top - br.top + box.scrollTop - ph2 - 6;
+  }
+  pk.style.left = left + "px";
+  pk.style.top  = top + "px";
+  pk.style.visibility = "";
   // 現在の値をハイライト
   const cur = moodData[key] || "";
   pk.querySelectorAll("button[data-mood]").forEach(b => {
@@ -1243,8 +1268,9 @@ $("mood-picker").addEventListener("click", function(e){
     delete moodData[pickerTarget];
   }
   saveMood();
+  const cell = document.querySelector('#cal-grid .cell[data-key="' + pickerTarget + '"]');
+  if(cell) paintMood(cell, pickerTarget);   // 暦全体は描き直さない
   closePicker();
-  drawCal();
 });
 
 // カレンダー外タップでピッカーを閉じる
