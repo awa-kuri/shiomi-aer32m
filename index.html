@@ -35,13 +35,13 @@ body{
 /* ---- ヘッダー ---- */
 header{display:flex;align-items:center;justify-content:space-between;padding:14px 2px 6px}
 h1{margin:0;font-size:18px;font-weight:700;letter-spacing:.14em}
-#today{margin-left:auto;margin-right:12px;font-size:12px;font-weight:400;color:var(--ash);letter-spacing:.05em}
+#today{margin-left:auto;margin-right:12px;font-size:12px;font-weight:600;color:var(--ash);letter-spacing:.05em}
 #about-btn{
   width:36px;height:36px;border:none;border-radius:50%;
   background:#ffffffcc;box-shadow:0 1px 3px #0000000f;
   display:grid;place-items:center;cursor:pointer;padding:0;
 }
-#about-btn svg{width:20px;height:20px;fill:var(--amber-dk);opacity:.85}
+#about-btn img{width:17px;height:20px;opacity:.70}
 .wave{display:block;width:100%;height:8px;margin-bottom:12px;opacity:.5}
 
 /* ---- 入力欄 ---- */
@@ -209,6 +209,7 @@ dl{margin:0}
   display:block;width:100%;margin-top:18px;padding:9px 0;border:none;border-radius:12px;
   background:#00000008;color:var(--ash);font:inherit;font-size:11.5px;letter-spacing:.14em;cursor:pointer;
 }
+
 
 /* ---- 今夜の月（暦と同じ小窓。構図はアイコンに合わせる） ---- */
 #sky{
@@ -392,9 +393,7 @@ dl{margin:0}
     <h1>潮見帳</h1>
     <div id="today" class="num"></div>
     <button id="about-btn" aria-label="このアプリについて">
-      <svg viewBox="0 0 24 24" aria-hidden="true" xmlns="http://www.w3.org/2000/svg">
-  <path d="M8.1 2.2c.75 0 1.25 1 1.45 2.4.2 1.4.25 2.8.25 4.1h1.9c0-1.3.05-2.7.25-4.1.2-1.4.7-2.4 1.45-2.4.9 0 1.4 1.1 1.4 3 0 1.5-.35 2.9-.85 3.8 1.6 1.2 2.7 3.1 2.7 5.4 0 3.2-2.6 5.4-6.15 5.4S4.35 17.6 4.35 14.4c0-2.3 1.1-4.2 2.7-5.4-.5-.9-.85-2.3-.85-3.8 0-1.9.5-3 1.4-3Z"/>
-</svg>
+    <img src="shiomi_assets/r_ash.png">
     </button>
   </header>
   <svg class="wave" viewBox="0 0 400 8" preserveAspectRatio="none" aria-hidden="true">
@@ -465,21 +464,19 @@ dl{margin:0}
     </div>
   </section>
 
-  <div class="foot" role="button" tabindex="0" aria-label="この帳面について">体重データ：2026年2-8月 6周期（ロキソ期除外）<br>潮見帳 v2</div>
+  <div class="foot" role="button" tabindex="0" aria-label="この帳面について">データ出典：2026年2-8月 6周期（ロキソ期除外）<br>潮見帳 v2</div>
 </div>
 
 <div id="info" role="dialog" aria-modal="true" aria-label="この帳面について">
   <div class="info-box">
-    <img id="info-art" alt="">
-    <h3>潮見帳とは</h3>
-    <p>身体の水の満ち引きを「潮」に見立てて、今日が周期のどこにいるかを確かめるための帳面である。記録を付ける道具ではない。開いて、確かめて、閉じる。それだけでよい。設定はこの端末の中にだけ残る。</p>
+ <img id="info-art" alt="">
+ <hr>
+    <h3>出典</h3>
+    <p>症状・体重・危険ゾーンの情報は一般論ではない。2026年2月から8月まで、ロキソニン服用期を除く6周期分の記録──眠気、偏頭痛、食欲、便通、浮腫み、体重の推移──を、周期日に照らして拾い上げたものである。<br>
+    ……当たる日もあれば、外れる日もある。外れた日は、外れたという記録になる。</p>
 
     <h3>四つの帯</h3>
-    <p>生理期は開始から七日、黄体期は次の潮から遡って十四日を当てている。周期の長さを変えると、伸び縮みするのは卵胞期──実際の身体もそう動く。</p>
-
-    <h3>数字の出処</h3>
-    <p>症状・体重・危険ゾーンは一般論ではない。二〇二六年二月から八月まで、六周期分の記録（ロキソニン服用期を除く）を周期日に照らし合わせて拾い上げたものである。眠気、偏頭痛、食欲、便通、浮腫み、体重の推移。</p>
-    <p>だから当たる日もあれば、外れる日もある。外れた日は、外れたという記録になる。</p>
+    <p>生理期は開始から七日、黄体期は次の潮から遡って十四日を当てている。周期の長さを変えると、卵胞期が伸び縮みする。実際の身体もそう動く。</p>
 
     <hr>
 
@@ -608,7 +605,6 @@ dl{margin:0}
 <p>月の下には、ウサギとテンがいる。<br>
 一緒に、月を見ている。</p>
 </div>
-
 
   </div>
 </div>
