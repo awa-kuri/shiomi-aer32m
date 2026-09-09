@@ -1,9 +1,10 @@
 // 潮見帳 Service Worker
 // キャッシュ名の数字を上げると、次回起動時に中身が入れ替わる
-const CACHE = "shiomi-v9";
+const CACHE = "shiomi-v10";
 
 const CORE = [
   "./", "./index.html", "./manifest.json", "./icon-192.png", "./icon-512.png",
+  "./shiomi_assets/r_ash.png",
   "./shiomi_assets/marten_lantern.png",
   "./shiomi_assets/marten_arms.png",
   "./shiomi_assets/marten_sitting.png",
