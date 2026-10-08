@@ -308,6 +308,9 @@ dl{margin:0}
 #cal-grid .cell .d{font-size:12px;color:var(--ink);opacity:.9;line-height:1}
 #cal-grid .cell.today .d{font-weight:700;opacity:1}
 #cal-grid .cell i{width:4px;height:4px;border-radius:50%;display:block}
+#cal-grid .cell i.est{background:none !important;box-shadow:inset 0 0 0 1px var(--ash)}
+#cal-hist{font-size:10.5px;color:var(--ash);letter-spacing:.03em;line-height:1.6;margin-top:8px;padding:0 2px}
+#cal-hist b{color:var(--ink);font-weight:500}
 /* 体調アイコン（セル右下からはみ出して乗る） */
 #cal-grid .cell .mood{
   position:absolute;right:-3px;bottom:-2px;width:22px;height:22px;
@@ -336,6 +339,15 @@ dl{margin:0}
 #mood-picker button:active{background:#00000008}
 #mood-picker button.sel{border-color:var(--amber);background:#dba14518}
 #mood-picker button img{width:22px;height:22px;object-fit:contain}
+#mood-picker .start{
+  height:32px;border:2px solid transparent;border-radius:10px;
+  background:#00000008;cursor:pointer;padding:0 8px;margin-left:4px;
+  font:inherit;font-size:11px;color:var(--ink);white-space:nowrap;
+  display:flex;align-items:center;gap:4px;
+}
+#mood-picker .start i{width:7px;height:7px;border-radius:50%;background:#c17767;display:block}
+#mood-picker .start.sel{border-color:#c17767;background:#c1776718}
+#mood-picker .start:disabled{opacity:.35;cursor:default}
 #mood-picker .clear{
   width:24px;height:24px;border:none;border-radius:50%;
   background:#00000008;cursor:pointer;padding:0;
@@ -477,6 +489,8 @@ dl{margin:0}
 
     <h3>四つの帯</h3>
     <p>生理期は開始から七日、黄体期は次の潮から遡って十四日を当てている。周期の長さを変えると、卵胞期が伸び縮みする。実際の身体もそう動く。</p>
+    <p>潮の始まりは一つずつ記録に残る。済んだ周期は、その時の実際の長さで帯を塗り、後から動かぬ。「周期」の数は、今の周期と先の見込みにだけ使う。<br>
+    新しい潮が来たら、開始日を新しい日に変えればよい。十四日以内の変更は、今の周期の日付の直しとして扱う。過去の始まりを足す・消すは、暦の日を押して「潮」の札で行う。</p>
 
     <hr>
 
@@ -540,7 +554,9 @@ dl{margin:0}
       <button data-mood="ok" title="ふつう"><img src="shiomi_assets/mood_ok.png" alt="ふつう"></button>
       <button data-mood="bad" title="つらい"><img src="shiomi_assets/mood_bad.png" alt="つらい"></button>
       <button class="clear" data-mood="" title="消す">−</button>
+      <button class="start" data-start="1" title="この日を潮の始まりとして記す"><i></i>潮</button>
     </div>
+    <div id="cal-hist"></div>
     <div class="cal-foot">
       <div id="cal-legend"></div>
       <img id="cal-art" alt="">
@@ -637,7 +653,7 @@ const PHASES = [
     theme:"引き潮。減らす時期ではない。戻す時期である。",
     marten:"mS", flip:false, rabbit:"rE", rScale:0.7,
     hormone:"エストロゲン・プロゲステロンともに最低水準。溜まっていた水分が排出に向かう。",
-    body:"出血による鉄の消耗。倦怠感・眠気が強い（Day 2-6 で連日）。便秘が徐々に解消。喉の渇き・頻尿（水分排出期）。Day 6 前後に軽い頭痛が出ることがある。",
+    body:"出血による鉄の消耗。倦怠感・眠気が強い（Day 2-6 で連日）。便秘が徐々に解消。喉の渇き・頻尿（水分排出期）。Day 5-8（生理明け）に偏頭痛・菓子欲求・気分の落ち込みが集まりやすい（二周期続けて確認）。",
     weight:"周期内で最も重い時期（平均 53.79kg）。Day 6-7 にかけて下がり始める。",
     note:"クラムシェル・レクサプロ開始後、偏頭痛は生理前からこの時期へ後ろにずれた。症状自体も軽くなっている。",
     hint:"▽",
@@ -656,7 +672,7 @@ const PHASES = [
     hormone:"エストロゲンが緩やかに上昇。セロトニンの活性も高まりやすい。",
     body:"エネルギーが最も安定する時期。集中力・意欲が回復し、運動の出力も上がりやすい。",
     weight:"体重が落ち着く時期（平均 53.68kg）。水分変動が少なく、BIA 計測値も安定。",
-    note:"ただし生理中の症状が後倒しになって食い込むことがある（Day 9-12 に強い眠気など）。凪いでいるはずの帯で不調が出ても、異常ではない。",
+    note:"入口の Day 8 は、まだ生理明けの窓の内である。生理中の症状が後倒しになって食い込むこともある（Day 9-12 に強い眠気など）。凪いでいるはずの帯で不調が出ても、異常ではない。",
     hint:"♪",
     talkM:["今日は行ける","風が凪いでいる","試すなら、この帯である","身体が応える時期だ",
            "風向きがよい","新しい道を試してみよ","身体が軽いはずだ",
@@ -706,7 +722,11 @@ const PHASES = [
 /* ================= 保存 ================= */
 const KEY = "shiomi-settings";
 const MOOD_KEY = "shiomi-mood";
-const DEFAULTS = {startDate:"2026-08-23", cycleLength:28};
+const CYC_KEY = "shiomi-cycles";   // 潮の始まりの記録（日付の配列、古い順）
+const DEFAULTS = {startDate:"2026-09-17", cycleLength:26};
+/* 初めて開いた時に流し込む、これまでの潮の始まり */
+const SEED_STARTS = ["2026-02-08","2026-03-07","2026-04-03","2026-05-01",
+                     "2026-06-04","2026-07-02","2026-07-28","2026-08-23","2026-09-17"];
 
 function load(){
   try{
@@ -783,25 +803,73 @@ function phaseIndexOf(day, cyc){
   return 3;
 }
 
-function compute(s){
-  const start = parseDate(s.startDate), cyc = s.cycleLength;
-  const today = midnight(new Date());
-  if(!start) return null;
-  let diff = Math.round((today - start) / DAY_MS);
-  if(diff < 0) diff = 0;                       // 未来日が入っていたら Day 1 とみなす
-  const day = (diff % cyc) + 1;
-  const nextStart = new Date(start.getTime() + (Math.floor(diff / cyc) + 1) * cyc * DAY_MS);
-  const left = Math.round((nextStart - today) / DAY_MS);
-  return {day, cyc, left, nextStart, idx: phaseIndexOf(day, cyc), weekday: today.getDay()};
+/* ---- 潮の記録 ---- */
+let starts = [];   // "YYYY-MM-DD" の配列。古い順、重複なし
+function normStarts(arr){
+  return Array.from(new Set((arr || []).filter(x => parseDate(x)))).sort();
+}
+function loadStarts(){
+  let arr = null;
+  try{ arr = JSON.parse(localStorage.getItem(CYC_KEY)); }catch(e){}
+  if(!Array.isArray(arr) || !arr.length){
+    // 初回：これまでの記録に、今の開始日を足して流し込む
+    arr = SEED_STARTS.concat(settings.startDate ? [settings.startDate] : []);
+  }
+  starts = normStarts(arr);
+  saveStarts();
+}
+function saveStarts(){
+  try{ localStorage.setItem(CYC_KEY, JSON.stringify(starts)); }catch(e){}
+  if(starts.length){ settings.startDate = starts[starts.length - 1]; save(settings); }
+}
+function daysBetween(a, b){ return Math.round((midnight(b) - midnight(a)) / DAY_MS); }
+
+/* 任意の日の周期情報。
+   済んだ周期 → 次の始まりまでの実際の長さで数える（動かない）。
+   今の周期   → 「周期」の見込みで数え、越えたら見込みで先へ回す。
+   記録より前 → 最初の始まりから見込みで遡る。 */
+function cycleInfo(date){
+  const t = midnight(date), C = settings.cycleLength;
+  if(!starts.length) return null;
+  const first = parseDate(starts[0]);
+  if(t < first){
+    const diff = daysBetween(first, t);                     // 負の数
+    const day = ((diff % C) + C) % C + 1;
+    return {day, len:C, idx:phaseIndexOf(day, C), est:true,
+            nextStart:new Date(t.getTime() + (C - day + 1) * DAY_MS), isStart:false};
+  }
+  let i = starts.length - 1;
+  while(i > 0 && parseDate(starts[i]) > t) i--;
+  const s0 = parseDate(starts[i]);
+  const diff = daysBetween(s0, t);
+  if(i < starts.length - 1){
+    const len = daysBetween(s0, parseDate(starts[i + 1]));
+    const day = diff + 1;
+    return {day, len, idx:phaseIndexOf(day, len), est:false,
+            nextStart:parseDate(starts[i + 1]), isStart:diff === 0};
+  }
+  // 今の周期（とその先の見込み）
+  const day = (diff % C) + 1;
+  const nextStart = new Date(s0.getTime() + (Math.floor(diff / C) + 1) * C * DAY_MS);
+  return {day, len:C, idx:phaseIndexOf(day, C), est:diff >= C,
+          nextStart, isStart:diff === 0};
 }
 
-/* 任意の日が周期の何日目か（過去の月・先の月も引けるよう剰余を正に寄せる） */
-function cycleDayOf(date){
-  const start = parseDate(settings.startDate);
-  if(!start) return 1;
-  const cyc = settings.cycleLength;
-  const diff = Math.round((midnight(date) - start) / DAY_MS);
-  return ((diff % cyc) + cyc) % cyc + 1;
+function compute(){
+  const today = midnight(new Date());
+  const ci = cycleInfo(today);
+  if(!ci) return null;
+  const left = Math.round((ci.nextStart - today) / DAY_MS);
+  return {day:ci.day, cyc:ci.len, left, nextStart:ci.nextStart, idx:ci.idx, weekday:today.getDay()};
+}
+
+/* 済んだ周期の長さ（新しい順） */
+function pastLengths(){
+  const out = [];
+  for(let i = starts.length - 1; i > 0; i--){
+    out.push(daysBetween(parseDate(starts[i - 1]), parseDate(starts[i])));
+  }
+  return out;
 }
 
 const WD = ["日","月","火","水","木","金","土"];
@@ -812,13 +880,11 @@ function fmtToday(d){
 /* 危険ゾーン */
 function dangerOf(c){
   const b = bounds(c.cyc);
-  if(c.idx === 0){
-    if(c.day >= 5){
-      return c.weekday === 5
-        ? "⚠ 食欲亢進 × 金曜　討死の危険域"
-        : "⚠ 食欲亢進に注意";
-    }
-    return "";
+  /* 生理明けの窓（Day 5-8）。偏頭痛・菓子欲求・気分の揺れが、二周期続けてここに集まった */
+  if(c.day >= 5 && c.day <= 8){
+    return c.weekday === 5
+      ? "⚠ 生理明けの窓 × 金曜　討死の危険域"
+      : "⚠ 生理明けの窓　頭痛・菓子欲求・気分の揺れ";
   }
   if(c.idx === 2) return "⚠ 食欲亢進の始まり　白米を抜くな";
   if(c.idx === 3) return c.day >= b[3] + 2 ? "⚠ メンタルの谷／浮腫み・食欲亢進" : "⚠ 食欲亢進・便秘の強まり";
@@ -850,7 +916,7 @@ let settings = load();
 function reveal(el){ el.classList.remove("in"); void el.offsetWidth; el.classList.add("in"); }
 
 function render(){
-  const c = compute(settings);
+  const c = compute();
   if(!c) return;
   const p = PHASES[c.idx];
 
@@ -939,7 +1005,7 @@ function drawTimeline(c){
 /* ================= おまけ：二匹が一言返す ================= */
 let bubbleTimer = null;
 function speak(who, el){
-  const c = compute(settings);
+  const c = compute();
   if(!c) return;
   const p = PHASES[c.idx];
   const lines = (who === "m" ? p.talkM : p.talkR) || [];
@@ -1156,8 +1222,9 @@ function drawCal(){
   for(let i = 0; i < first.getDay(); i++) g.appendChild(document.createElement("div"));
   for(let d = 1; d <= lastDay; d++){
     const date = new Date(y, m, d);
-    const cd = cycleDayOf(date);
-    const ph = PHASES[phaseIndexOf(cd, settings.cycleLength)];
+    const ci = cycleInfo(date);
+    const cd = ci.day;
+    const ph = PHASES[ci.idx];
     const key = dateKey(y, m, d);
     const cell = document.createElement("div");
     cell.className = "cell" + (date.getTime() === today ? " today" : "");
@@ -1171,6 +1238,8 @@ function drawCal(){
     if(cd === 1){
       const dot = document.createElement("i");
       dot.style.background = ph.color;
+      // 記録された始まりは塗り、見込みは輪で
+      if(!starts.includes(key)) dot.className = "est";
       cell.appendChild(dot);
     }
     paintMood(cell, key);
@@ -1196,7 +1265,23 @@ function drawCal(){
     b.innerHTML = '<i style="background:none;box-shadow:none;display:grid;place-items:center">'
                 + '<span style="width:4px;height:4px;border-radius:50%;background:var(--ash);display:block"></span></i>潮の始まり';
     lg.appendChild(b);
+    const e = document.createElement("div");
+    e.innerHTML = '<i style="background:none;box-shadow:none;display:grid;place-items:center">'
+                + '<span style="width:4px;height:4px;border-radius:50%;box-shadow:inset 0 0 0 1px var(--ash);display:block"></span></i>見込み';
+    lg.appendChild(e);
   }
+  drawHist();
+}
+
+/* 近ごろの周期の長さ */
+function drawHist(){
+  const L = pastLengths();
+  const h = $("cal-hist");
+  if(!L.length){ h.innerHTML = ""; return; }
+  const recent = L.slice(0, 3);
+  const avg = Math.round(recent.reduce((a, b) => a + b, 0) / recent.length * 10) / 10;
+  h.innerHTML = '近ごろの潮　<b class="num">' + recent.join("・") + '</b> 日　'
+              + '（平均 <b class="num">' + avg + '</b> 日／記録 ' + starts.length + ' 回）';
 }
 
 function openCal(){
@@ -1250,6 +1335,9 @@ function openPicker(cell, key){
   pk.querySelectorAll("button[data-mood]").forEach(b => {
     b.classList.toggle("sel", b.dataset.mood === cur);
   });
+  const sb = pk.querySelector("button[data-start]");
+  sb.classList.toggle("sel", starts.includes(key));
+  sb.disabled = parseDate(key) > midnight(new Date());   // 先の日は記せない
   pk.classList.add("on");
 }
 function closePicker(){
@@ -1274,6 +1362,25 @@ $("mood-picker").addEventListener("click", function(e){
   closePicker();
 });
 
+// 「潮」の札：その日を潮の始まりとして記す／消す
+$("mood-picker").querySelector("button[data-start]").addEventListener("click", function(e){
+  e.stopPropagation();
+  const key = pickerTarget;
+  if(!key || this.disabled) return;
+  const d = parseDate(key);
+  if(starts.includes(key)){
+    if(starts.length <= 1) return;   // 最後の一つは消さない
+    if(!confirm((d.getMonth() + 1) + "月" + d.getDate() + "日の潮の始まりを消す。よいか")) return;
+    starts = starts.filter(x => x !== key);
+  }else{
+    starts = normStarts(starts.concat([key]));
+  }
+  saveStarts();
+  $("start").value = settings.startDate;
+  render();
+  drawCal();
+});
+
 // カレンダー外タップでピッカーを閉じる
 document.addEventListener("click", function(e){
   if(!$("mood-picker").classList.contains("on")) return;
@@ -1283,12 +1390,30 @@ document.addEventListener("click", function(e){
 });
 
 /* ================= 操作 ================= */
+loadStarts();
 $("start").value = settings.startDate;
 $("cycle").value = settings.cycleLength;
 
+/* 開始日の欄。
+   今の始まりから十五日以上あとの日 → 新しい潮として記録に足す。
+   それより手前 → 今の周期の日付の直しとして置き換える。
+   一つ前の始まり以前・未来の日 → 受け付けない（記録を壊さぬため）。 */
 $("start").addEventListener("change", e => {
-  if(!parseDate(e.target.value)) return;
-  settings.startDate = e.target.value; save(settings); render();
+  const v = e.target.value, d = parseDate(v);
+  const today = midnight(new Date());
+  const last = parseDate(starts[starts.length - 1]);
+  const prev = starts.length > 1 ? parseDate(starts[starts.length - 2]) : null;
+  if(!d || d > today || (prev && d <= prev)){
+    e.target.value = settings.startDate;
+    return;
+  }
+  if(daysBetween(last, d) >= 15){
+    starts = normStarts(starts.concat([v]));
+  }else{
+    starts = normStarts(starts.slice(0, -1).concat([v]));
+  }
+  saveStarts();
+  render();
 });
 $("cycle").addEventListener("change", e => {
   settings.cycleLength = clampCycle(e.target.value);
